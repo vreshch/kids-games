@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { playFinalRoar } from '@/lib/scary-sound';
+
 const MAX_LEVEL = 6;
 
 const FACE_COLORS = ['#22c55e', '#7ede4a', '#ffd93d', '#ff8c1a', '#e02424', '#7a0c0c', '#050505'];
@@ -69,11 +71,17 @@ export function ScarySmile() {
   const isFinal = level === MAX_LEVEL;
   const glowClass = isFinal ? 'animate-creep-glow' : '';
 
+  const handleClick = () => {
+    const next = level >= MAX_LEVEL ? 0 : level + 1;
+    setLevel(next);
+    if (next === MAX_LEVEL) playFinalRoar();
+  };
+
   return (
     <div className="flex flex-col items-center gap-6">
       <button
         type="button"
-        onClick={() => setLevel((l) => (l >= MAX_LEVEL ? 0 : l + 1))}
+        onClick={handleClick}
         aria-label={isFinal ? 'Start over' : 'Make the face scarier'}
         className={`cursor-pointer rounded-full transition-transform duration-200 hover:scale-105 active:scale-95 ${
           level >= 5 ? 'animate-shake' : ''
