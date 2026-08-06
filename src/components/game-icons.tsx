@@ -1,0 +1,36 @@
+type IconProps = { className?: string };
+
+export function SmileIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <circle cx={24} cy={24} r={21} fill="#22c55e" />
+      <circle cx={17} cy={19} r={4.5} fill="#fffdf5" />
+      <circle cx={31} cy={19} r={4.5} fill="#fffdf5" />
+      <circle cx={17} cy={19} r={2} fill="#14351f" />
+      <circle cx={31} cy={19} r={2} fill="#14351f" />
+      <path
+        d="M 14 29 Q 24 39 34 29"
+        fill="none"
+        stroke="#2b0505"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function ParrotIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <path d="M 30 28 Q 39 34 44 43 L 37 41 Q 30 36 26 31 Z" fill="#0ea5e9" />
+      <ellipse cx={25} cy={30} rx={11} ry={13} fill="#22c55e" />
+      <ellipse cx={23} cy={32} rx={6} ry={8} fill="#86efac" />
+      <circle cx={24} cy={16} r={11} fill="#22c55e" />
+      <circle cx={21} cy={19} r={6.5} fill="#fde047" />
+      <path d="M 24 4 Q 30 1 35 4 Q 29 5 27 9 Z" fill="#ef4444" />
+      <circle cx={22} cy={14} r={2.6} fill="#1a1a1a" />
+      <path d="M 16 16 Q 6 18 11 24 Q 15 22 17 19 Z" fill="#fb923c" />
+      <rect x={9} y={43} width={30} height={3} rx={1.5} fill="#92400e" />
+    </svg>
+  );
+}

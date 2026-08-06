@@ -58,9 +58,57 @@ body {
   animation: creep-glow 1.4s ease-in-out infinite;
 }
 
+@keyframes beak-talk {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+.animate-beak {
+  animation: beak-talk 0.22s ease-in-out infinite;
+}
+
+@keyframes listen-pulse {
+  0% {
+    opacity: 0.28;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+.animate-listen {
+  animation: listen-pulse 1.2s ease-out infinite;
+  transform-box: view-box;
+  transform-origin: 100px 130px;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bob {
+  animation: bob 0.7s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-shake,
-  .animate-creep-glow {
+  .animate-creep-glow,
+  .animate-beak,
+  .animate-listen,
+  .animate-bob {
     animation: none;
   }
 }
