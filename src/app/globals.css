@@ -21,3 +21,29 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-3px, 2px) rotate(-1.2deg);
+  }
+  50% {
+    transform: translate(3px, -2px) rotate(1.2deg);
+  }
+  75% {
+    transform: translate(-2px, -3px) rotate(0.6deg);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.16s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake {
+    animation: none;
+  }
+}
