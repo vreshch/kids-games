@@ -42,8 +42,25 @@ body {
   animation: shake 0.16s infinite;
 }
 
+@keyframes creep-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px currentColor);
+    opacity: 0.82;
+  }
+  50% {
+    filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
+    opacity: 1;
+  }
+}
+
+.animate-creep-glow {
+  animation: creep-glow 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-shake {
+  .animate-shake,
+  .animate-creep-glow {
     animation: none;
   }
 }
