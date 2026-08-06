@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { playFinalRoar } from '@/lib/scary-sound';
+import { speakHint, stopSpeech } from '@/lib/speak';
 
 const MAX_LEVEL = 6;
 
@@ -74,7 +75,12 @@ export function ScarySmile() {
   const handleClick = () => {
     const next = level >= MAX_LEVEL ? 0 : level + 1;
     setLevel(next);
-    if (next === MAX_LEVEL) playFinalRoar();
+    if (next === MAX_LEVEL) {
+      stopSpeech();
+      playFinalRoar();
+    } else {
+      speakHint(HINTS[next], next);
+    }
   };
 
   return (
