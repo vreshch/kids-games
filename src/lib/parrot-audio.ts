@@ -10,6 +10,11 @@ function getContext() {
   return context;
 }
 
+/** iOS only unlocks audio inside the tap itself, so call this from the handler. */
+export function primeAudio() {
+  getContext();
+}
+
 /** Starts capturing the microphone; resolve the returned stop() to get the clip. */
 export async function startRecording(): Promise<Recorder> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

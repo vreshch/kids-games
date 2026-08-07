@@ -17,9 +17,18 @@
   }
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 @keyframes shake {
@@ -89,6 +98,19 @@ body {
   transform-origin: 100px 130px;
 }
 
+@keyframes listen-ring {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+
+.animate-listen-ring {
+  animation: listen-ring linear forwards;
+}
+
 @keyframes bob {
   0%,
   100% {
@@ -108,6 +130,7 @@ body {
   .animate-creep-glow,
   .animate-beak,
   .animate-listen,
+  .animate-listen-ring,
   .animate-bob {
     animation: none;
   }

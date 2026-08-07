@@ -6,11 +6,11 @@ export function GameShell({ children }: { children: ReactNode }) {
     <main className="flex flex-1 flex-col">
       <Link
         href="/"
-        className="absolute top-6 left-6 text-sm text-neutral-500 transition hover:text-neutral-200"
+        className="inline-flex min-h-12 touch-manipulation items-center self-start px-5 text-base text-neutral-500 transition active:text-neutral-200 [@media(hover:hover)]:hover:text-neutral-200"
       >
         &larr; all games
       </Link>
-      <div className="flex flex-1 items-center justify-center">{children}</div>
+      <div className="flex flex-1 items-center justify-center py-4">{children}</div>
     </main>
   );
 }
