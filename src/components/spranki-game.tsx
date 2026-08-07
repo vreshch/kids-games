@@ -24,7 +24,7 @@ export function SprankiGame() {
     primeAudio();
     const loops = loopsRef.current;
     loops.get(slot)?.stop();
-    loops.set(slot, startVoice(character));
+    loops.set(slot, startVoice(slot, character));
     setStage((current) => current.map((id, i) => (i === slot ? character.id : id)));
     setPicked(null);
   }, []);
@@ -75,7 +75,7 @@ export function SprankiGame() {
   const pickedCharacter = characterById(picked);
 
   return (
-    <div className="flex w-full flex-col self-stretch select-none">
+    <div className="mx-auto flex w-full flex-col self-stretch select-none sm:max-w-[80vw]">
       <section className="flex min-h-0 flex-[7] flex-col items-center justify-center gap-3 px-2 py-3">
         <ul className="grid min-h-0 w-full flex-1 grid-cols-4 grid-rows-2 gap-1 sm:grid-cols-7 sm:grid-rows-1 sm:gap-3">
           {stage.map((id, slot) => {
