@@ -41,11 +41,32 @@ function Perch() {
   );
 }
 
-export function Parrot({ state }: { state: ParrotState }) {
+export function Parrot({ state, listenMs }: { state: ParrotState; listenMs: number }) {
   const listening = state === 'listening';
   return (
-    <svg viewBox="0 0 200 224" className="w-[40vmin]" role="img" aria-label="Perot the parrot">
+    <svg
+      viewBox="0 0 200 224"
+      className="w-[min(78vw,44vh)]"
+      role="img"
+      aria-label="Perot the parrot"
+    >
       {listening && <circle cx={100} cy={130} r={96} fill="#22c55e" className="animate-listen" />}
+      {listening && (
+        <circle
+          cx={100}
+          cy={120}
+          r={92}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth={5}
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray={100}
+          transform="rotate(-90 100 120)"
+          className="animate-listen-ring"
+          style={{ animationDuration: `${listenMs}ms` }}
+        />
+      )}
       <g
         className={state === 'thinking' ? 'animate-bob' : ''}
         style={{

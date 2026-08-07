@@ -1,9 +1,20 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: "Alyssa's Games",
   description: 'A little collection of browser games.',
+  appleWebApp: { capable: true, title: "Alyssa's Games", statusBarStyle: 'black-translucent' },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  // small fingers double-tap a lot; zooming mid-game is never what they meant
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#0a0a0a',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
