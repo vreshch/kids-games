@@ -2,71 +2,67 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { type Loop, primeAudio, startLoop } from '@/lib/spranki-audio';
+import { EmptySlot, SprunkiCharacter } from '@/components/sprunki-character';
+import { type Loop, primeAudio, startVoice } from '@/lib/spranki-audio';
+import { CAST, type Character, SLOT_COUNT } from '@/lib/sprunki-cast';
 
-type Character = {
-  id: string;
-  name: string;
-  color: string;
-  frequency: number;
-  pulsesPerSecond: number;
-  level: number;
-};
+type Drag = { character: Character; x: number; y: number };
 
-/** Placeholder cast - the real Spranki characters go here. */
-const CAST: Character[] = [
-  { id: 'boom', name: 'Boom', color: '#ef4444', frequency: 98, pulsesPerSecond: 1, level: 0.1 },
-  { id: 'bass', name: 'Bass', color: '#a855f7', frequency: 147, pulsesPerSecond: 2, level: 0.08 },
-  { id: 'hum', name: 'Hum', color: '#0ea5e9', frequency: 294, pulsesPerSecond: 4, level: 0.05 },
-  { id: 'ping', name: 'Ping', color: '#facc15', frequency: 587, pulsesPerSecond: 8, level: 0.03 },
-];
+const EMPTY_STAGE: (string | null)[] = Array.from({ length: SLOT_COUNT }, () => null);
 
-function Blob({ character, active }: { character: Character; active: boolean }) {
-  return (
-    <svg viewBox="0 0 100 120" className="w-full" role="img" aria-label={character.name}>
-      <ellipse cx={50} cy={112} rx={26} ry={5} fill="#000" opacity={active ? 0.5 : 0.25} />
-      <rect
-        x={18}
-        y={26}
-        width={64}
-        height={80}
-        rx={30}
-        fill={character.color}
-        opacity={active ? 1 : 0.35}
-      />
-      <circle cx={38} cy={58} r={8} fill="#fffdf5" />
-      <circle cx={62} cy={58} r={8} fill="#fffdf5" />
-      <circle cx={38} cy={58} r={active ? 3.5 : 4} fill="#1a1a1a" />
-      <circle cx={62} cy={58} r={active ? 3.5 : 4} fill="#1a1a1a" />
-      {active ? (
-        <ellipse cx={50} cy={82} rx={10} ry={12} fill="#1a1a1a" />
-      ) : (
-        <path d="M 40 84 Q 50 90 60 84" fill="none" stroke="#1a1a1a" strokeWidth={4} />
-      )}
-    </svg>
-  );
+function characterById(id: string | null) {
+  return id ? (CAST.find((c) => c.id === id) ?? null) : null;
 }
 
 export function SprankiGame() {
-  const [active, setActive] = useState<string[]>([]);
-  const loopsRef = useRef(new Map<string, Loop>());
+  const [stage, setStage] = useState<(string | null)[]>(EMPTY_STAGE);
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const loopsRef = useRef(new Map<number, Loop>());
 
-  const toggle = useCallback((character: Character) => {
+  const fill = useCallback((slot: number, character: Character) => {
     primeAudio();
     const loops = loopsRef.current;
-    const running = loops.get(character.id);
-    if (running) {
-      running.stop();
-      loops.delete(character.id);
-      setActive((current) => current.filter((id) => id !== character.id));
-      return;
-    }
-    loops.set(
-      character.id,
-      startLoop(character.frequency, character.pulsesPerSecond, character.level)
-    );
-    setActive((current) => [...current, character.id]);
+    loops.get(slot)?.stop();
+    loops.set(slot, startVoice(character));
+    setStage((current) => current.map((id, i) => (i === slot ? character.id : id)));
+    setPicked(null);
   }, []);
+
+  const clear = useCallback((slot: number) => {
+    const loops = loopsRef.current;
+    loops.get(slot)?.stop();
+    loops.delete(slot);
+    setStage((current) => current.map((id, i) => (i === slot ? null : id)));
+  }, []);
+
+  /** Pointer events cover both a finger and a mouse; pan-x still scrolls the tray. */
+  const startDrag = useCallback((character: Character, event: React.PointerEvent) => {
+    primeAudio();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDrag({ character, x: event.clientX, y: event.clientY });
+  }, []);
+
+  const moveDrag = useCallback(
+    (event: React.PointerEvent) => {
+      if (!drag) return;
+      setDrag({ ...drag, x: event.clientX, y: event.clientY });
+    },
+    [drag]
+  );
+
+  const endDrag = useCallback(
+    (event: React.PointerEvent) => {
+      if (!drag) return;
+      const dropped = document
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest<HTMLElement>('[data-slot]');
+      if (dropped) fill(Number(dropped.dataset.slot), drag.character);
+      else setPicked(drag.character.id);
+      setDrag(null);
+    },
+    [drag, fill]
+  );
 
   useEffect(() => {
     const loops = loopsRef.current;
@@ -76,35 +72,76 @@ export function SprankiGame() {
     };
   }, []);
 
+  const pickedCharacter = characterById(picked);
+
   return (
-    <div className="flex flex-col items-center gap-6">
-      <ul className="grid w-[min(88vw,26rem)] grid-cols-2 gap-4 sm:grid-cols-4">
-        {CAST.map((character) => {
-          const isActive = active.includes(character.id);
-          return (
-            <li key={character.id}>
+    <div className="flex w-full flex-col self-stretch select-none">
+      <section className="flex min-h-0 flex-[7] flex-col items-center justify-center gap-3 px-2 py-3">
+        <ul className="grid min-h-0 w-full flex-1 grid-cols-4 grid-rows-2 gap-1 sm:grid-cols-7 sm:grid-rows-1 sm:gap-3">
+          {stage.map((id, slot) => {
+            const character = characterById(id);
+            return (
+              <li key={slot} className="flex min-h-0 min-w-0 items-center justify-center">
+                <button
+                  type="button"
+                  data-slot={slot}
+                  onClick={() =>
+                    character ? clear(slot) : pickedCharacter && fill(slot, pickedCharacter)
+                  }
+                  aria-label={character ? `Remove ${character.name}` : `Empty spot ${slot + 1}`}
+                  className={`h-full w-full touch-manipulation rounded-2xl p-1 transition ${
+                    character ? 'animate-bob' : ''
+                  } ${pickedCharacter && !character ? 'bg-neutral-800/70 ring-2 ring-neutral-500' : ''}`}
+                  style={{
+                    filter: character ? `drop-shadow(0 0 12px ${character.color})` : 'none',
+                  }}
+                >
+                  {character ? <SprunkiCharacter character={character} singing /> : <EmptySlot />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="min-h-6 text-center text-sm text-neutral-500">
+          {pickedCharacter
+            ? `tap an empty spot to drop ${pickedCharacter.name}`
+            : 'drag someone up here - tap them again to send them home'}
+        </p>
+      </section>
+
+      <section className="flex min-h-0 flex-[3] border-t border-neutral-800 bg-neutral-900/40">
+        <ul className="flex min-h-0 flex-1 items-stretch gap-3 overflow-x-auto px-4 py-2">
+          {CAST.map((character) => (
+            <li key={character.id} className="flex min-h-0 shrink-0">
               <button
                 type="button"
-                onClick={() => toggle(character)}
-                aria-pressed={isActive}
-                className={`w-full touch-manipulation rounded-2xl p-2 transition-transform duration-200 active:scale-95 [@media(hover:hover)]:hover:scale-105 ${
-                  isActive ? 'animate-bob' : ''
-                }`}
-                style={{ filter: isActive ? `drop-shadow(0 0 14px ${character.color})` : 'none' }}
+                onPointerDown={(event) => startDrag(character, event)}
+                onPointerMove={moveDrag}
+                onPointerUp={endDrag}
+                onPointerCancel={() => setDrag(null)}
+                aria-label={`${character.name}, ${character.category}`}
+                className={`flex h-full w-16 touch-pan-x flex-col items-center justify-center gap-1 rounded-xl p-1 transition ${
+                  picked === character.id ? 'bg-neutral-700' : ''
+                } ${drag?.character.id === character.id ? 'opacity-40' : ''}`}
               >
-                <Blob character={character} active={isActive} />
-                <span className="mt-1 block text-sm text-neutral-400">{character.name}</span>
+                <span className="flex min-h-0 flex-1 items-center">
+                  <SprunkiCharacter character={character} />
+                </span>
+                <span className="truncate text-[10px] text-neutral-400">{character.name}</span>
               </button>
             </li>
-          );
-        })}
-      </ul>
-      <p className="max-w-xs px-4 text-center text-lg tracking-wide text-neutral-400 select-none">
-        {active.length === 0
-          ? 'tap a character to start the beat'
-          : 'stack them up - tap again to stop one'}
-      </p>
-      <p className="text-sm text-neutral-600 select-none">placeholder - the real game comes next</p>
+          ))}
+        </ul>
+      </section>
+
+      {drag && (
+        <div
+          className="pointer-events-none fixed z-50 h-28 w-20 -translate-x-1/2 -translate-y-1/2"
+          style={{ left: drag.x, top: drag.y }}
+        >
+          <SprunkiCharacter character={drag.character} singing />
+        </div>
+      )}
     </div>
   );
 }

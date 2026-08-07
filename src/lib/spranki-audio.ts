@@ -1,3 +1,5 @@
+import { type Character, VOICE } from '@/lib/sprunki-cast';
+
 export type Loop = { stop: () => void };
 
 let context: AudioContext | null = null;
@@ -14,16 +16,17 @@ export function primeAudio() {
 }
 
 /**
- * One voice: a tone whose volume is swung by a slow oscillator, so it pulses on
- * its own with no scheduler. Every voice starts on the same beat grid, which is
- * what makes two of them sound like one track.
+ * One character's voice: a tone whose volume is swung by a slow oscillator, so it
+ * pulses on its own with no scheduler. Voices start on a shared beat grid, which is
+ * what makes a stage full of characters sound like one track.
  */
-export function startLoop(frequency: number, pulsesPerSecond: number, level: number): Loop {
+export function startVoice(character: Character): Loop {
   const ctx = getContext();
+  const { wave, pulsesPerSecond, level } = VOICE[character.category];
 
   const tone = ctx.createOscillator();
-  tone.type = 'triangle';
-  tone.frequency.value = frequency;
+  tone.type = wave;
+  tone.frequency.value = character.frequency;
 
   const swell = ctx.createGain();
   swell.gain.value = level;
@@ -35,9 +38,13 @@ export function startLoop(frequency: number, pulsesPerSecond: number, level: num
   depth.gain.value = level;
   pulse.connect(depth).connect(swell.gain);
 
+  const tame = ctx.createBiquadFilter();
+  tame.type = 'lowpass';
+  tame.frequency.value = 2200;
+
   const out = ctx.createGain();
   out.gain.value = 0;
-  tone.connect(swell).connect(out).connect(ctx.destination);
+  tone.connect(swell).connect(tame).connect(out).connect(ctx.destination);
 
   const start = Math.ceil(ctx.currentTime * pulsesPerSecond) / pulsesPerSecond;
   tone.start(start);
