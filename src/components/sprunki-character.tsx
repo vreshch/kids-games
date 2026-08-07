@@ -61,10 +61,15 @@ export function SprunkiCharacter({
 export function EmptySlot() {
   return (
     <svg viewBox="0 0 100 130" className="h-full w-full" aria-hidden="true">
-      <g fill="none" stroke="#525252" strokeWidth={3} strokeDasharray="8 8" strokeLinejoin="round">
-        <path d="M 50 52 L 86 118 L 14 118 Z" />
-        <circle cx={50} cy={48} r={30} />
-      </g>
+      {/* One outline around head and body, so the dashes trace the character, not two shapes. */}
+      <path
+        d="M 14 118 L 35.3 74.2 A 30 30 0 1 1 64.7 74.2 L 86 118 Z"
+        fill="none"
+        stroke="#525252"
+        strokeWidth={3}
+        strokeDasharray="8 8"
+        strokeLinejoin="round"
+      />
       <circle cx={39} cy={44} r={4} fill="#525252" />
       <circle cx={61} cy={44} r={4} fill="#525252" />
     </svg>
