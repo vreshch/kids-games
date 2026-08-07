@@ -5,7 +5,7 @@ import { GAMES } from '@/lib/games';
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center gap-8 px-5 py-10 sm:gap-10 sm:py-16">
-      <h1 className="text-center text-3xl font-bold sm:text-4xl">Alyssa&apos;s Games</h1>
+      <h1 className="text-center text-3xl font-bold sm:text-4xl">Alysa&apos;s Games</h1>
       <ul className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
         {GAMES.map(({ slug, title, tagline, accent, Icon }) => (
           <li key={slug}>

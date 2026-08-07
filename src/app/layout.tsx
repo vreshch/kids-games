@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Alyssa's Games",
+  title: "Alysa's Games",
   description: 'A little collection of browser games.',
-  appleWebApp: { capable: true, title: "Alyssa's Games", statusBarStyle: 'black-translucent' },
+  appleWebApp: { capable: true, title: "Alysa's Games", statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {
