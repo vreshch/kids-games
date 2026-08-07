@@ -19,6 +19,25 @@ export function SmileIcon({ className }: IconProps) {
   );
 }
 
+export function SprankiIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <rect x={3} y={14} width={18} height={30} rx={9} fill="#a855f7" />
+      <rect x={27} y={8} width={18} height={36} rx={9} fill="#0ea5e9" />
+      <circle cx={9} cy={24} r={3} fill="#fffdf5" />
+      <circle cx={15} cy={24} r={3} fill="#fffdf5" />
+      <circle cx={33} cy={19} r={3} fill="#fffdf5" />
+      <circle cx={39} cy={19} r={3} fill="#fffdf5" />
+      <circle cx={9} cy={24} r={1.4} fill="#1a1a1a" />
+      <circle cx={15} cy={24} r={1.4} fill="#1a1a1a" />
+      <circle cx={33} cy={19} r={1.4} fill="#1a1a1a" />
+      <circle cx={39} cy={19} r={1.4} fill="#1a1a1a" />
+      <ellipse cx={12} cy={33} rx={4} ry={5} fill="#1a1a1a" />
+      <ellipse cx={36} cy={29} rx={4} ry={5} fill="#1a1a1a" />
+    </svg>
+  );
+}
+
 export function ParrotIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
