@@ -9,8 +9,12 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
+ARG COMMIT_SHA="" BUILD_TIME=""
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
+# /health reads these at runtime; version.json alone only serves the build-time /api/version route.
+ENV COMMIT_SHA=${COMMIT_SHA}
+ENV BUILD_TIME=${BUILD_TIME}
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
