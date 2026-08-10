@@ -1,0 +1,120 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: vreshch/kids-games
+  SITE_URL: https://games.vreshch.com
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🛠️ Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🐳 Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
+            BRANCH=${{ github.ref_name }}
+            BUILD_TIME=${{ github.event.repository.updated_at }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: 🚀 Deploy
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔧 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📤 Copy compose file
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.SERVER_HOST }} "mkdir -p /opt/kids-games"
+          scp -i ~/.ssh/deploy_key docker-compose.yml root@${{ secrets.SERVER_HOST }}:/opt/kids-games/
+
+      - name: Write runtime env on server
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.SERVER_HOST }} "install -m 600 /dev/stdin /opt/kids-games/.env" <<'ENV_EOF'
+          # SigNoz tracing over the WG mesh; unset token would leave these blank = tracer off.
+          OTEL_EXPORTER_OTLP_ENDPOINT=http://172.31.0.1:4318
+          OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer%20${{ secrets.SIGNOZ_INGEST_TOKEN }}
+          OTEL_SERVICE_NAME=kids-games-web
+          OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.namespace=side
+          OTEL_TRACES_SAMPLER=parentbased_traceidratio
+          OTEL_TRACES_SAMPLER_ARG=1.0
+          OTEL_METRICS_EXPORTER=none
+          OTEL_LOGS_EXPORTER=none
+          ENV_EOF
+
+      - name: 🚀 Deploy stack
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.SERVER_HOST }} << EOF
+            set -e
+            cd /opt/kids-games
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}|g" docker-compose.yml
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            docker stack deploy -c docker-compose.yml kids-games --with-registry-auth
+            docker service update --force kids-games_web
+            docker service ps kids-games_web --no-trunc --format "table {{.Name}}\t{{.CurrentState}}\t{{.Error}}"
+          EOF
+
+      - name: ✅ Verify deployment
+        run: |
+          for i in $(seq 1 30); do
+            LIVE=$(curl -sf "${{ env.SITE_URL }}/api/version" 2>/dev/null | jq -r '.commit // empty') || true
+            if [ "$LIVE" = "${{ github.sha }}" ]; then
+              echo "✅ Live commit: $LIVE"
+              exit 0
+            fi
+            echo "⏳ $i/30 - got: ${LIVE:-no response}"
+            sleep 10
+          done
+          echo "❌ ${{ env.SITE_URL }} is not serving this commit"
+          exit 1
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

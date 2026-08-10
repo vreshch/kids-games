@@ -12,13 +12,13 @@ const BROW_COLORS = ['#14351f', '#2b4a12', '#5c4406', '#6b2f00', '#4a0d0d', '#2e
 const SCLERA_COLORS = ['#fffdf5', '#fffdf5', '#fffdf5', '#fff6d5', '#ffeaa8', '#ffd166', '#ffcf3d'];
 const PUPIL_COLORS = ['#14351f', '#14351f', '#2b1010', '#4a1010', '#5c1010', '#8a0f0f', '#ff1a1a'];
 const HINTS = [
-  'click me',
+  'tap me',
   'ooh...',
   'hmm...',
   'are you sure?',
   'getting spooky!',
   'RUN!',
-  'click to start over',
+  'tap to start over',
 ];
 
 const TONGUE_PATH = 'M 86 146 Q 100 138 114 146 L 111 206 L 104 228 L 100 212 L 96 228 L 89 206 Z';
@@ -89,12 +89,12 @@ export function ScarySmile() {
         type="button"
         onClick={handleClick}
         aria-label={isFinal ? 'Start over' : 'Make the face scarier'}
-        className={`cursor-pointer rounded-full transition-transform duration-200 hover:scale-105 active:scale-95 ${
+        className={`touch-manipulation rounded-full transition-transform duration-200 active:scale-95 [@media(hover:hover)]:hover:scale-105 ${
           level >= 5 ? 'animate-shake' : ''
         }`}
         style={{ filter: `drop-shadow(0 0 ${level * 12}px rgba(255, 40, 40, ${level * 0.16}))` }}
       >
-        <svg viewBox="0 0 200 240" className="w-[40vmin]" role="img">
+        <svg viewBox="0 0 200 240" className="w-[min(78vw,44vh)]" role="img">
           <circle
             cx={100}
             cy={100}
@@ -127,7 +127,9 @@ export function ScarySmile() {
           {level >= 2 && <Brow x={120} level={level} flip />}
         </svg>
       </button>
-      <p className="text-lg tracking-wide text-neutral-400 select-none">{HINTS[level]}</p>
+      <p className="px-4 text-center text-lg tracking-wide text-neutral-400 select-none">
+        {HINTS[level]}
+      </p>
     </div>
   );
 }
