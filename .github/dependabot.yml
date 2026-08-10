@@ -11,6 +11,8 @@ updates:
     open-pull-requests-limit: 10
     ignore:
       # typescript-eslint peer-caps typescript <6.1.0 - drop when it supports 7.x
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
     groups:
