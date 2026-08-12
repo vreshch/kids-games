@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { ComponentType } from 'react';
 
 import { CrystalIcon, ParrotIcon, SmileIcon, SprankiIcon } from '@/components/game-icons';
@@ -41,3 +42,15 @@ export const GAMES: Game[] = [
     Icon: CrystalIcon,
   },
 ];
+
+/** Page metadata derived from the registry, so every game gets a description + OG card. */
+export function gameMetadata(slug: string): Metadata {
+  const game = GAMES.find((entry) => entry.slug === slug);
+  if (!game) return {};
+  return {
+    title: game.title,
+    description: game.tagline,
+    alternates: { canonical: `/${slug}` },
+    openGraph: { title: game.title, description: game.tagline, url: `/${slug}` },
+  };
+}

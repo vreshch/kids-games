@@ -1,10 +1,12 @@
 import type { MetadataRoute } from 'next';
 
+import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Alysa's Games",
+    name: SITE_NAME,
     short_name: 'Games',
-    description: 'A little collection of browser games.',
+    description: SITE_DESCRIPTION,
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

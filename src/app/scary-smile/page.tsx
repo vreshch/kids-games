@@ -1,9 +1,8 @@
-import type { Metadata } from 'next';
-
 import { GameShell } from '@/components/game-shell';
+import { gameMetadata } from '@/lib/games';
 import { ScarySmile } from '@/components/scary-smile';
 
-export const metadata: Metadata = { title: 'Scary Smile' };
+export const metadata = gameMetadata('scary-smile');
 
 export default function ScarySmilePage() {
   return (
