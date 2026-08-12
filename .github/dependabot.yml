@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
       day: friday
-      time: '16:00'
+      time: '16:07'
       timezone: Etc/UTC
     assignees: ['vreshch']
     open-pull-requests-limit: 10
@@ -19,12 +19,25 @@ updates:
       all-dependencies:
         patterns: ['*']
 
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: '16:07'
+      timezone: Etc/UTC
+    assignees: ['vreshch']
+    open-pull-requests-limit: 5
+    groups:
+      all-docker:
+        patterns: ['*']
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: friday
-      time: '16:00'
+      time: '16:07'
       timezone: Etc/UTC
     assignees: ['vreshch']
     open-pull-requests-limit: 5
