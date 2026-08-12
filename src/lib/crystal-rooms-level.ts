@@ -31,7 +31,7 @@ export const PLAYER_R = 0.45;
 
 /** One is picked at random per run - any length works, rooms are generated. */
 export const WORDS = [
-  'ALYSA',
+  'ALISA',
   'CAT',
   'DOG',
   'SUN',
