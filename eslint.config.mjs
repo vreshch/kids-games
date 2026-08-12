@@ -5,6 +5,11 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    // react-three-fiber: three.js props are not DOM props; refs are mutated per-frame by design
+    files: ['src/components/crystal-rooms/**'],
+    rules: { 'react/no-unknown-property': 'off', 'react-hooks/immutability': 'off' },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

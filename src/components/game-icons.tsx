@@ -53,3 +53,18 @@ export function ParrotIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function CrystalIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <path d="M 24 3 L 38 14 L 33 43 L 15 43 L 10 14 Z" fill="#2dd4bf" />
+      <path d="M 24 3 L 38 14 L 24 20 Z" fill="#5eead4" />
+      <path d="M 24 3 L 10 14 L 24 20 Z" fill="#99f6e4" />
+      <path d="M 10 14 L 15 43 L 24 20 Z" fill="#14b8a6" />
+      <path d="M 38 14 L 33 43 L 24 20 Z" fill="#0d9488" />
+      <text x={24} y={37} textAnchor="middle" fontSize={15} fontWeight={700} fill="#fffdf5">
+        A
+      </text>
+    </svg>
+  );
+}
