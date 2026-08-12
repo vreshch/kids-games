@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+import { GoogleAnalytics } from '@/components/google-analytics';
 import { ServiceWorker } from '@/components/service-worker';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         {children}
         <ServiceWorker />
+        <GoogleAnalytics />
       </body>
     </html>
   );

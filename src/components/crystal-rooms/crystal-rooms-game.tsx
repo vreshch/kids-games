@@ -3,6 +3,7 @@
 import { Canvas } from '@react-three/fiber';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import { trackEvent } from '@/lib/analytics';
 import { playDoorOpen, playFanfare, playKeyChime, unlockCrystalAudio } from '@/lib/crystal-audio';
 import { buildLevel, WORDS, type Level } from '@/lib/crystal-rooms-level';
 import { primeSpeech, speakLetter, speakWord } from '@/lib/crystal-speech';
@@ -68,6 +69,7 @@ function GameRun({ onRestart }: { onRestart: () => void }) {
         if (prev.length + 1 === level.rooms.length) {
           setTimeout(playFanfare, 900);
           setTimeout(() => speakWord(level.word), 2400);
+          trackEvent('game_complete', { game: 'crystal-rooms', word: level.word });
         }
         return [...prev, roomId];
       });
@@ -107,7 +109,9 @@ function GameRun({ onRestart }: { onRestart: () => void }) {
           onClick={() => {
             unlockCrystalAudio();
             primeSpeech();
-            setWord(pickWord());
+            const next = pickWord();
+            setWord(next);
+            trackEvent('game_start', { game: 'crystal-rooms', word: next });
           }}
         >
           <span className="text-3xl font-bold text-white sm:text-4xl">Crystal Rooms</span>
