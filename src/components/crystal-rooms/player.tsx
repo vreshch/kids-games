@@ -4,15 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, type RefObject } from 'react';
 import { Group, Vector3 } from 'three';
 
-import {
-  collide,
-  doorBox,
-  DOORS,
-  PLAYER_R,
-  ROOMS,
-  START_POS,
-  WALLS,
-} from '@/lib/crystal-rooms-level';
+import { collide, doorBox, PLAYER_R, type Level } from '@/lib/crystal-rooms-level';
 
 import type { MoveInput } from './controls';
 
@@ -21,21 +13,26 @@ const CAMERA_OFFSET = new Vector3(0, 6.5, 7.2);
 const PICKUP_DIST = 1.25;
 
 type Props = {
+  level: Level;
   input: RefObject<MoveInput>;
   collected: number[];
   onCollect: (roomId: number) => void;
   frozen: boolean;
 };
 
-export function Player({ input, collected, onCollect, frozen }: Props) {
+export function Player({ level, input, collected, onCollect, frozen }: Props) {
   const group = useRef<Group>(null);
   const facing = useRef(Math.PI);
   const camera = useThree((s) => s.camera);
-  const lookTarget = useRef(new Vector3(START_POS[0], 0.8, START_POS[1]));
+  const lookTarget = useRef(new Vector3(level.start[0], 0.8, level.start[1]));
 
   const colliders = useMemo(
-    () => [...WALLS, ...DOORS.filter((d) => !collected.includes(d.id)).map(doorBox)],
-    [collected]
+    () => [
+      ...level.walls,
+      ...level.pillars,
+      ...level.doors.filter((d) => !collected.includes(d.id)).map(doorBox),
+    ],
+    [level, collected]
   );
 
   useFrame((state, rawDelta) => {
@@ -64,7 +61,7 @@ export function Player({ input, collected, onCollect, frozen }: Props) {
       body.position.y += (0 - body.position.y) * Math.min(1, delta * 10);
     }
 
-    for (const room of ROOMS) {
+    for (const room of level.rooms) {
       if (collected.includes(room.id)) continue;
       const kx = room.center[0] + room.keyPos[0];
       const kz = room.center[1] + room.keyPos[1];
@@ -81,7 +78,7 @@ export function Player({ input, collected, onCollect, frozen }: Props) {
   });
 
   return (
-    <group ref={group} position={[START_POS[0], 0, START_POS[1]]} rotation={[0, Math.PI, 0]}>
+    <group ref={group} position={[level.start[0], 0, level.start[1]]} rotation={[0, Math.PI, 0]}>
       <mesh position={[0, 0.55, 0]}>
         <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
         <meshStandardMaterial color="#f59e0b" roughness={0.5} />

@@ -36,7 +36,7 @@ export const GAMES: Game[] = [
   {
     slug: 'crystal-rooms',
     title: 'Crystal Rooms',
-    tagline: 'Walk the crystal caves, find the letter keys, spell your name.',
+    tagline: 'Walk the crystal caves, find the letter keys, spell the word.',
     accent: '#2dd4bf',
     Icon: CrystalIcon,
   },
