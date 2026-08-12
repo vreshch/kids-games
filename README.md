@@ -1,6 +1,6 @@
 # Alisa's Games
 
-![Alisa's Games - little browser games built by a 5-year-old with a little help from Claude Code](docs/banner.svg)
+![Alisa's Games - little browser games built by a 5-year-old with a little help from Claude Code](public/banner.svg)
 
 [![Play](https://img.shields.io/badge/%E2%96%B6%20play-games.vreshch.com-2dd4bf)](https://games.vreshch.com)
 [![CI](https://github.com/vreshch/kids-games/actions/workflows/ci.yml/badge.svg)](https://github.com/vreshch/kids-games/actions/workflows/ci.yml)

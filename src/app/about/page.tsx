@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -21,9 +22,17 @@ function alisaAge(): number {
 export default function AboutPage() {
   const age = alisaAge();
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 px-5 py-10 sm:py-16">
-      <h1 className="text-center text-3xl font-bold sm:text-4xl">About these games</h1>
-      <div className="flex flex-col gap-4 text-lg leading-relaxed text-neutral-300">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 px-5 py-10 sm:py-16 lg:max-w-3xl">
+      <Image
+        src="/banner.svg"
+        alt="Alisa's Games - a crystal, the letters A L I S A, and games.vreshch.com"
+        width={1200}
+        height={300}
+        priority
+        className="w-full rounded-2xl border border-neutral-800"
+      />
+      <h1 className="text-center text-3xl font-bold sm:text-4xl lg:text-5xl">About these games</h1>
+      <div className="flex flex-col gap-4 text-lg leading-relaxed text-neutral-300 lg:text-xl">
         <p>
           Every game here was invented by <strong className="text-white">Alisa Vreshch</strong>, who
           is {age} years old. The monsters, the parrot, the crystal caves - all her ideas.{' '}
