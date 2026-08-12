@@ -79,29 +79,30 @@ export function Player({ level, input, collected, onCollect, frozen }: Props) {
 
   return (
     <group ref={group} position={[level.start[0], 0, level.start[1]]} rotation={[0, Math.PI, 0]}>
+      <pointLight position={[0, 3.2, -0.5]} intensity={26} distance={17} color="#dbeafe" />
       <mesh position={[0, 0.55, 0]}>
         <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
-        <meshStandardMaterial color="#f59e0b" roughness={0.5} />
+        <meshLambertMaterial color="#f59e0b" />
       </mesh>
       <mesh position={[0, 1.32, 0]}>
         <sphereGeometry args={[0.3, 20, 16]} />
-        <meshStandardMaterial color="#fcd34d" roughness={0.4} />
+        <meshLambertMaterial color="#fcd34d" />
       </mesh>
       {[-0.11, 0.11].map((x) => (
         <group key={x}>
           <mesh position={[x, 1.38, 0.26]}>
             <sphereGeometry args={[0.06, 10, 8]} />
-            <meshStandardMaterial color="#ffffff" />
+            <meshLambertMaterial color="#ffffff" />
           </mesh>
           <mesh position={[x, 1.38, 0.31]}>
             <sphereGeometry args={[0.028, 8, 6]} />
-            <meshStandardMaterial color="#1c1917" />
+            <meshLambertMaterial color="#1c1917" />
           </mesh>
         </group>
       ))}
       <mesh position={[0, 1.72, 0]} rotation={[0, 0, 0.08]}>
         <coneGeometry args={[0.16, 0.34, 5]} />
-        <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.5} />
+        <meshLambertMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.5} />
       </mesh>
       <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.42, 24]} />
