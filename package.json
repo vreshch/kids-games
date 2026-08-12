@@ -10,7 +10,9 @@
     "type-check": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "npm run type-check && npm run lint && npm run format:check && npm run build"
+    "verify": "npm run type-check && npm run lint && npm run format:check && npm run test && npm run build",
+    "test": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@agentage/observability": "^0.8.0",
@@ -23,17 +25,20 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.185.4",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "type": "module"
 }
