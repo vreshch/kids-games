@@ -45,6 +45,9 @@ function LetterHud({ level, collected }: { level: Level; collected: number[] }) 
   );
 }
 
+const isTouchDevice = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 function GameRun({ onRestart }: { onRestart: () => void }) {
   const input = useRef<MoveInput>({ x: 0, z: 0 });
   const [word, setWord] = useState<string | null>(null);
@@ -52,6 +55,7 @@ function GameRun({ onRestart }: { onRestart: () => void }) {
   const started = word !== null;
   const level = useMemo(() => buildLevel(word ?? WORDS[0]), [word]);
   const won = started && collected.length === level.rooms.length;
+  const touch = useMemo(() => isTouchDevice(), []);
   useKeyboardInput(input);
 
   const onCollect = useCallback(
@@ -77,8 +81,8 @@ function GameRun({ onRestart }: { onRestart: () => void }) {
         key={level.word}
         className="absolute inset-0"
         camera={{ position: [0, 6.5, 10.4], fov: 55 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        dpr={[1, touch ? 1.35 : 1.75]}
+        gl={{ antialias: !touch, powerPreference: 'high-performance' }}
       >
         <World level={level} unlockedDoors={collected} won={won} />
         {level.rooms.map((room) => (

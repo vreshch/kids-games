@@ -45,8 +45,7 @@ export function KeyCrystal({ room, collected }: Props) {
           </mesh>
         </group>
         <LetterSprite letter={room.letter} color={room.color} position={[0, 1.15, 0]} />
-        <pointLight color={room.color} intensity={6} distance={7} />
-        {!collected && <Sparkles count={16} scale={2.2} size={3} speed={0.5} color={room.color} />}
+        {!collected && <Sparkles count={10} scale={2.2} size={3} speed={0.5} color={room.color} />}
       </group>
       {!collected && (
         <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
