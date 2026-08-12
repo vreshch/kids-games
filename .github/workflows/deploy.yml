@@ -104,7 +104,7 @@ jobs:
       - name: ✅ Verify deployment
         run: |
           for i in $(seq 1 30); do
-            LIVE=$(curl -sf "${{ env.SITE_URL }}/api/version" 2>/dev/null | jq -r '.commit // empty') || true
+            LIVE=$(curl -sf "${{ env.SITE_URL }}/health" 2>/dev/null | jq -r '.data.version // empty') || true
             if [ "$LIVE" = "${{ github.sha }}" ]; then
               echo "✅ Live commit: $LIVE"
               exit 0

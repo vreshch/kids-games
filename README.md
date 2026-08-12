@@ -54,7 +54,7 @@ Drop a component in `src/components/`, a page in `src/app/<slug>/`, and an entry
 ### Deploy
 
 Push to `master`. CI builds `ghcr.io/vreshch/kids-games`, deploys the `kids-games` Swarm stack
-behind Traefik, then fails the run unless `https://games.vreshch.com/api/version` reports the
+behind Traefik, then fails the run unless `https://games.vreshch.com/health` reports the
 deployed commit. Never deploy by hand.
 
 Repo secrets: `SERVER_HOST`, `SSH_PRIVATE_KEY` (environment `production`).
