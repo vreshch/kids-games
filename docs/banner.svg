@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Alisa's Games - little browser games built by a 5-year-old with a little help from Claude Code">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.6" stop-color="#131f3a"/>
+      <stop offset="1" stop-color="#0d2438"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="16" fill="url(#bg)"/>
+
+  <!-- crystal (same facets as the site icon) -->
+  <g transform="translate(80,40) scale(4.6)">
+    <path d="M 24 3 L 38 14 L 33 43 L 15 43 L 10 14 Z" fill="#2dd4bf"/>
+    <path d="M 24 3 L 38 14 L 24 20 Z" fill="#5eead4"/>
+    <path d="M 24 3 L 10 14 L 24 20 Z" fill="#99f6e4"/>
+    <path d="M 10 14 L 15 43 L 24 20 Z" fill="#14b8a6"/>
+    <path d="M 38 14 L 33 43 L 24 20 Z" fill="#0d9488"/>
+  </g>
+
+  <g font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <text x="340" y="112" font-size="64" font-weight="700" fill="#f8fafc">Alisa's Games</text>
+    <text x="342" y="158" font-size="26" fill="#94a3b8">Little browser games built by a 5-year-old,</text>
+    <text x="342" y="192" font-size="26" fill="#94a3b8">with a little help from Claude Code.</text>
+
+    <!-- letter key tiles -->
+    <g font-size="34" font-weight="700" text-anchor="middle">
+      <rect x="342" y="216" width="56" height="56" rx="14" fill="#0f172a99" stroke="#38bdf8" stroke-width="3"/>
+      <text x="370" y="256" fill="#38bdf8">A</text>
+      <rect x="410" y="216" width="56" height="56" rx="14" fill="#0f172a99" stroke="#4ade80" stroke-width="3"/>
+      <text x="438" y="256" fill="#4ade80">L</text>
+      <rect x="478" y="216" width="56" height="56" rx="14" fill="#0f172a99" stroke="#c084fc" stroke-width="3"/>
+      <text x="506" y="256" fill="#c084fc">I</text>
+      <rect x="546" y="216" width="56" height="56" rx="14" fill="#0f172a99" stroke="#fbbf24" stroke-width="3"/>
+      <text x="574" y="256" fill="#fbbf24">S</text>
+      <rect x="614" y="216" width="56" height="56" rx="14" fill="#0f172a99" stroke="#f472b6" stroke-width="3"/>
+      <text x="642" y="256" fill="#f472b6">A</text>
+    </g>
+
+    <text x="1160" y="262" font-size="24" text-anchor="end" fill="#5eead4">games.vreshch.com</text>
+  </g>
+</svg>
