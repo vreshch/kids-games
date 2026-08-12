@@ -1,9 +1,8 @@
-import type { Metadata } from 'next';
-
 import { CrystalRoomsGame } from '@/components/crystal-rooms/crystal-rooms-game';
 import { GameShell } from '@/components/game-shell';
+import { gameMetadata } from '@/lib/games';
 
-export const metadata: Metadata = { title: 'Crystal Rooms' };
+export const metadata = gameMetadata('crystal-rooms');
 
 export default function CrystalRoomsPage() {
   return (
