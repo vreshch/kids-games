@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 
-import { ParrotIcon, SmileIcon, SprankiIcon } from '@/components/game-icons';
+import { CrystalIcon, ParrotIcon, SmileIcon, SprankiIcon } from '@/components/game-icons';
 
 export type Game = {
   slug: string;
@@ -32,5 +32,12 @@ export const GAMES: Game[] = [
     tagline: 'Tap the characters, stack up a beat. Work in progress.',
     accent: '#a855f7',
     Icon: SprankiIcon,
+  },
+  {
+    slug: 'crystal-rooms',
+    title: 'Crystal Rooms',
+    tagline: 'Walk the crystal caves, find the letter keys, spell the word.',
+    accent: '#2dd4bf',
+    Icon: CrystalIcon,
   },
 ];
