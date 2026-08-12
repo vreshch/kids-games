@@ -21,6 +21,12 @@ export default function Home() {
           </li>
         ))}
       </ul>
+      <p className="text-center text-sm text-neutral-500">
+        Made by Alisa with a little help from Claude Code ·{' '}
+        <Link href="/about" className="text-teal-500 underline underline-offset-4">
+          About
+        </Link>
+      </p>
     </main>
   );
 }
