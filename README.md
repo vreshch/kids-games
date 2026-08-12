@@ -3,6 +3,13 @@
 Browser games built by Alisa, age 5, with a little help from Claude Code. Live at
 **https://games.vreshch.com**. Next.js (App Router) + React + TypeScript + Tailwind + three.js.
 
+## How a game gets made
+
+1. Alisa brings the requirements - usually a sketch drawn on paper.
+2. She dictates what the game should do to Claude Code through the microphone.
+3. Claude Code builds it; dad reviews the PR and merges.
+4. Alisa plays it on the phone and dictates changes. Repeat until it is fun.
+
 The home page is a grid of games. Add one by dropping a component in `src/components/`,
 a page in `src/app/<slug>/`, and an entry in `src/lib/games.ts` - the grid picks it up.
 

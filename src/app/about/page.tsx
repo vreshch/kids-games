@@ -43,10 +43,10 @@ export default function AboutPage() {
           , sits next to her, holds the phone, and merges the pull requests.
         </p>
         <ol className="list-decimal space-y-1 pl-6 text-neutral-400">
-          <li>Alisa describes a game.</li>
+          <li>Alisa draws the game on paper.</li>
+          <li>She tells Claude Code what to build - through the microphone.</li>
           <li>Claude Code builds it.</li>
-          <li>Alisa plays it and asks for changes.</li>
-          <li>Repeat until it is fun.</li>
+          <li>Alisa plays it and asks for changes. Repeat until it is fun.</li>
         </ol>
         <p>
           The whole site is open source at{' '}
