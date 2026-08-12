@@ -67,6 +67,10 @@ export default function AboutPage() {
           </a>
           . No accounts, no ads, no personal data - just games.
         </p>
+        <p className="text-neutral-400">
+          Tip: on the phone, use your browser&apos;s <em>Add to Home Screen</em> - the games open
+          full-screen like a real app, even on flaky wifi.
+        </p>
       </div>
       <Link
         href="/"
