@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 import { GoogleAnalytics } from '@/components/google-analytics';
+import { WebsiteJsonLd } from '@/components/json-ld';
 import { ServiceWorker } from '@/components/service-worker';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         {children}
+        <WebsiteJsonLd />
         <ServiceWorker />
         <GoogleAnalytics />
       </body>
