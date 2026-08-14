@@ -15,7 +15,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@agentage/observability": "^0.8.0",
+    "@agentage/observability": "^0.10.1",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "@vercel/otel": "^2.1.3",
