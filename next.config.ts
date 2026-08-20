@@ -3,6 +3,8 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  // only tiny pre-optimized icons; keep sharp off the 0.4-CPU container
+  images: { unoptimized: true, minimumCacheTTL: 604800 },
   async headers() {
     return [
       {
