@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -7,7 +7,7 @@ ARG COMMIT_SHA="" BRANCH="" BUILD_TIME=""
 RUN mkdir -p public && echo "{\"commit\":\"${COMMIT_SHA}\",\"branch\":\"${BRANCH}\",\"buildTime\":\"${BUILD_TIME}\"}" > public/version.json
 RUN npm run build
 
-FROM node:22-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ARG COMMIT_SHA="" BUILD_TIME=""
 ENV NODE_ENV=production
