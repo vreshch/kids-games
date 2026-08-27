@@ -32,6 +32,9 @@ tested, deployed automatically, and open source - this repository is the whole t
 | [<img src="docs/screenshots/scary-smile.png" width="180" alt="Scary Smile screenshot">](https://games.vreshch.com/scary-smile) | [<img src="docs/screenshots/perot.png" width="180" alt="Perot screenshot">](https://games.vreshch.com/perot) | [<img src="docs/screenshots/spranki.png" width="180" alt="Spranki screenshot">](https://games.vreshch.com/spranki) | [<img src="docs/screenshots/crystal-rooms.png" width="180" alt="Crystal Rooms screenshot">](https://games.vreshch.com/crystal-rooms) |
 |                                     Tap the smile through 7 stages until it is a monster.                                      |                        Tap the parrot, say something; it squawks it back pitched up.                         |                               Beat toy - tap characters, each adds a looping voice.                                |                                 3D crystal caves - walk, collect letter keys, spell a word out loud.                                 |
 
+**Privacy:** Perot uses the microphone, but no audio ever leaves the device - the clip is
+played back locally and thrown away. Nothing is recorded, uploaded, or stored.
+
 ## For developers
 
 Next.js (App Router) + React + TypeScript strict + Tailwind CSS v4. The 3D game uses

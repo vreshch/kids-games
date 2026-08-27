@@ -1,3 +1,4 @@
+import { declareAudioSession } from '@/lib/audio-session';
 import type { Character } from '@/lib/sprunki-cast';
 
 const BPM = 100;
@@ -16,7 +17,10 @@ let nextStepAt = 0;
 const playing = new Map<number, Character>();
 
 function getContext() {
-  context ??= new AudioContext();
+  if (!context) {
+    declareAudioSession('playback');
+    context = new AudioContext();
+  }
   void context.resume();
   return context;
 }

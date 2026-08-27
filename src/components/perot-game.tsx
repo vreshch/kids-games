@@ -3,22 +3,43 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Parrot, type ParrotState } from '@/components/parrot';
-import { playAsParrot, primeAudio, startRecording, type Recorder } from '@/lib/parrot-audio';
+import {
+  playAsParrot,
+  primeAudio,
+  queryMicPermission,
+  recordingFailure,
+  startRecording,
+  type MicFailure,
+  type Recorder,
+} from '@/lib/parrot-audio';
 
 const THINK_DELAY_MS = 700;
 const MIN_CLIP_BYTES = 1200;
 const MAX_LISTEN_MS = 6000;
 
-const HINTS: Record<ParrotState, string> = {
+type GameState = ParrotState | 'asking' | MicFailure;
+
+const HINTS: Record<GameState, string> = {
   idle: 'tap Perot and say something',
+  asking: 'the browser is asking to use the microphone - tap Allow',
   listening: 'listening... tap again when you are done',
   thinking: 'Perot is thinking...',
   talking: 'Perot says it back!',
-  denied: 'Perot needs the microphone - allow it, then try again',
+  denied: 'the microphone is blocked - a grown-up can allow it from the padlock by the address bar',
+  'no-mic': 'Perot cannot find a microphone on this device',
+  'mic-busy': 'the microphone is busy - close other apps that use it and try again',
+  unsupported: 'this browser cannot listen - open the game in Safari or Chrome',
 };
 
+const FAILURES: readonly GameState[] = ['denied', 'no-mic', 'mic-busy', 'unsupported'];
+
+function toParrotState(state: GameState): ParrotState {
+  if (state === 'asking') return 'idle';
+  return FAILURES.includes(state) ? 'denied' : (state as ParrotState);
+}
+
 export function PerotGame() {
-  const [state, setState] = useState<ParrotState>('idle');
+  const [state, setState] = useState<GameState>('idle');
   const recorderRef = useRef<Recorder | null>(null);
   const holdingRef = useRef(false);
   const autoStopRef = useRef<number | null>(null);
@@ -47,7 +68,7 @@ export function PerotGame() {
     const recorder = recorderRef.current;
     recorderRef.current = null;
     if (!recorder) {
-      setState((current) => (current === 'denied' ? current : 'idle'));
+      setState((current) => (FAILURES.includes(current) ? current : 'idle'));
       return;
     }
     const clip = await recorder.stop();
@@ -61,7 +82,14 @@ export function PerotGame() {
 
   const begin = useCallback(async () => {
     holdingRef.current = true;
-    setState('listening');
+    const permission = await queryMicPermission();
+    if (!holdingRef.current) return;
+    if (permission === 'denied') {
+      holdingRef.current = false;
+      setState('denied');
+      return;
+    }
+    setState(permission === 'granted' ? 'listening' : 'asking');
     try {
       const recorder = await startRecording();
       if (!holdingRef.current) {
@@ -69,11 +97,12 @@ export function PerotGame() {
         setState('idle');
         return;
       }
+      setState('listening');
       recorderRef.current = recorder;
       autoStopRef.current = window.setTimeout(() => void finish(), MAX_LISTEN_MS);
-    } catch {
+    } catch (error) {
       holdingRef.current = false;
-      setState('denied');
+      setState(recordingFailure(error));
     }
   }, [finish]);
 
@@ -115,7 +144,7 @@ export function PerotGame() {
         aria-pressed={state === 'listening'}
         className="touch-manipulation rounded-full transition-transform duration-200 active:scale-95 [@media(hover:hover)]:hover:scale-105"
       >
-        <Parrot state={state} listenMs={MAX_LISTEN_MS} />
+        <Parrot state={toParrotState(state)} listenMs={MAX_LISTEN_MS} />
       </button>
       <p className="min-h-14 max-w-xs px-4 text-center text-lg tracking-wide text-neutral-400 select-none">
         {HINTS[state]}

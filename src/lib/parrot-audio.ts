@@ -1,11 +1,20 @@
+import { declareAudioSession } from '@/lib/audio-session';
+
 export type Recorder = {
   stop: () => Promise<Blob>;
 };
 
+export type MicPermission = 'granted' | 'prompt' | 'denied' | 'unknown';
+
+export type MicFailure = 'denied' | 'no-mic' | 'mic-busy' | 'unsupported';
+
 let context: AudioContext | null = null;
 
 function getContext() {
-  context ??= new AudioContext();
+  if (!context) {
+    declareAudioSession('play-and-record');
+    context = new AudioContext();
+  }
   void context.resume();
   return context;
 }
@@ -15,8 +24,27 @@ export function primeAudio() {
   getContext();
 }
 
+/** Firefox does not know the 'microphone' permission name, hence 'unknown'. */
+export async function queryMicPermission(): Promise<MicPermission> {
+  try {
+    const status = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+    return status.state;
+  } catch {
+    return 'unknown';
+  }
+}
+
+export function recordingFailure(error: unknown): MicFailure {
+  if (error instanceof Error && error.message === 'unsupported') return 'unsupported';
+  const name = error instanceof DOMException ? error.name : '';
+  if (name === 'NotFoundError' || name === 'OverconstrainedError') return 'no-mic';
+  if (name === 'NotReadableError' || name === 'AbortError') return 'mic-busy';
+  return 'denied';
+}
+
 /** Starts capturing the microphone; resolve the returned stop() to get the clip. */
 export async function startRecording(): Promise<Recorder> {
+  if (!navigator.mediaDevices?.getUserMedia) throw new Error('unsupported');
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const recorder = new MediaRecorder(stream);
   const chunks: Blob[] = [];
