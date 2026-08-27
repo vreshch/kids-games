@@ -65,7 +65,8 @@ export default function AboutPage() {
           >
             github.com/vreshch/kids-games
           </a>
-          . No accounts, no ads, no personal data - just games.
+          . No accounts, no ads, no personal data - just games. Perot listens through the
+          microphone, but the sound never leaves the phone - it is played back and thrown away.
         </p>
         <p className="text-neutral-400">
           Tip: on the phone, use your browser&apos;s <em>Add to Home Screen</em> - the games open

@@ -1,7 +1,12 @@
+import { declareAudioSession } from '@/lib/audio-session';
+
 let context: AudioContext | null = null;
 
 function getContext() {
-  context ??= new AudioContext();
+  if (!context) {
+    declareAudioSession('playback');
+    context = new AudioContext();
+  }
   void context.resume();
   return context;
 }
