@@ -7,6 +7,7 @@ import {
   DOOR_W,
   PLAYER_R,
   WALL_T,
+  wordPoolForLevel,
   WORDS,
 } from './crystal-rooms-level';
 
@@ -21,7 +22,42 @@ describe('WORDS', () => {
   });
 });
 
+describe('wordPoolForLevel', () => {
+  it('serves 3-letter words at level 1, one letter more per level', () => {
+    expect(wordPoolForLevel(1).every((w) => w.length === 3)).toBe(true);
+    expect(wordPoolForLevel(2).every((w) => w.length === 4)).toBe(true);
+    expect(wordPoolForLevel(3).every((w) => w.length === 5)).toBe(true);
+  });
+
+  it('never returns an empty pool, even far past the longest word', () => {
+    for (let level = 1; level <= 30; level++) {
+      expect(wordPoolForLevel(level).length).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe('buildLevel', () => {
+  it('adds more pillars as difficulty rises', () => {
+    const counts = [1, 2, 3, 4].map((d) => buildLevel('FLOWER', d).pillars.length);
+    expect(counts[0]).toBe(0);
+    expect(counts[1]).toBeGreaterThan(counts[0]);
+    expect(counts[2]).toBeGreaterThan(counts[1]);
+    expect(counts[3]).toBeGreaterThan(counts[2]);
+  });
+
+  it('keeps start and every key clear of pillars at max difficulty', () => {
+    for (const word of WORDS) {
+      const level = buildLevel(word, 9);
+      const boxes = [...level.walls, ...level.pillars];
+      expect(collide(level.start[0], level.start[1], PLAYER_R, boxes)).toEqual(level.start);
+      for (const room of level.rooms) {
+        const keyX = room.center[0] + room.keyPos[0];
+        const keyZ = room.center[1] + room.keyPos[1];
+        expect(collide(keyX, keyZ, PLAYER_R, boxes)).toEqual([keyX, keyZ]);
+      }
+    }
+  });
+
   it.each(WORDS)('builds one room per letter for %s', (word) => {
     const level = buildLevel(word);
     expect(level.rooms.map((room) => room.letter).join('')).toBe(word);

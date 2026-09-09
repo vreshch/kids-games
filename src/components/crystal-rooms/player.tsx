@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, type RefObject } from 'react';
 import { Group, Vector3 } from 'three';
 
+import type { PlayerLook } from '@/lib/crystal-player-look';
 import { collide, doorBox, PLAYER_R, type Level } from '@/lib/crystal-rooms-level';
 
 import type { MoveInput } from './controls';
@@ -18,9 +19,91 @@ type Props = {
   collected: number[];
   onCollect: (roomId: number) => void;
   frozen: boolean;
+  look: PlayerLook;
 };
 
-export function Player({ level, input, collected, onCollect, frozen }: Props) {
+function Hat({ hat }: { hat: PlayerLook['hat'] }) {
+  if (hat === 'wizard') {
+    return (
+      <mesh position={[0, 1.72, 0]} rotation={[0, 0, 0.08]}>
+        <coneGeometry args={[0.16, 0.34, 5]} />
+        <meshLambertMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.5} />
+      </mesh>
+    );
+  }
+  if (hat === 'crown') {
+    return (
+      <group position={[0, 1.62, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.2, 0.23, 0.13, 12]} />
+          <meshLambertMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.35} />
+        </mesh>
+        {[0, 2.09, 4.19].map((a) => (
+          <mesh key={a} position={[Math.sin(a) * 0.18, 0.12, Math.cos(a) * 0.18]}>
+            <coneGeometry args={[0.05, 0.13, 6]} />
+            <meshLambertMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.35} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+  if (hat === 'bow') {
+    return (
+      <group position={[0, 1.63, 0]}>
+        {[-1, 1].map((s) => (
+          <mesh key={s} position={[s * 0.13, 0, 0]} rotation={[0, 0, (s * Math.PI) / 2]}>
+            <coneGeometry args={[0.09, 0.2, 8]} />
+            <meshLambertMaterial color="#f472b6" emissive="#f472b6" emissiveIntensity={0.4} />
+          </mesh>
+        ))}
+        <mesh>
+          <sphereGeometry args={[0.06, 10, 8]} />
+          <meshLambertMaterial color="#ec4899" />
+        </mesh>
+      </group>
+    );
+  }
+  return null;
+}
+
+function Outfit({ look }: { look: PlayerLook }) {
+  if (look.outfit === 'dress') {
+    return (
+      <group>
+        <mesh position={[0, 0.78, 0]}>
+          <capsuleGeometry args={[0.26, 0.35, 6, 14]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+        <mesh position={[0, 0.34, 0]}>
+          <coneGeometry args={[0.48, 0.72, 16]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+      </group>
+    );
+  }
+  if (look.outfit === 'cape') {
+    return (
+      <group>
+        <mesh position={[0, 0.55, 0]}>
+          <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+        <mesh position={[0, 0.68, -0.27]} scale={[1, 1, 0.32]}>
+          <coneGeometry args={[0.42, 0.85, 12]} />
+          <meshLambertMaterial color={look.color} emissive={look.color} emissiveIntensity={0.25} />
+        </mesh>
+      </group>
+    );
+  }
+  return (
+    <mesh position={[0, 0.55, 0]}>
+      <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
+      <meshLambertMaterial color={look.color} />
+    </mesh>
+  );
+}
+
+export function Player({ level, input, collected, onCollect, frozen, look }: Props) {
   const group = useRef<Group>(null);
   const facing = useRef(Math.PI);
   const camera = useThree((s) => s.camera);
@@ -80,10 +163,7 @@ export function Player({ level, input, collected, onCollect, frozen }: Props) {
   return (
     <group ref={group} position={[level.start[0], 0, level.start[1]]} rotation={[0, Math.PI, 0]}>
       <pointLight position={[0, 3.2, -0.5]} intensity={26} distance={17} color="#dbeafe" />
-      <mesh position={[0, 0.55, 0]}>
-        <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
-        <meshLambertMaterial color="#f59e0b" />
-      </mesh>
+      <Outfit look={look} />
       <mesh position={[0, 1.32, 0]}>
         <sphereGeometry args={[0.3, 20, 16]} />
         <meshLambertMaterial color="#fcd34d" />
@@ -100,10 +180,7 @@ export function Player({ level, input, collected, onCollect, frozen }: Props) {
           </mesh>
         </group>
       ))}
-      <mesh position={[0, 1.72, 0]} rotation={[0, 0, 0.08]}>
-        <coneGeometry args={[0.16, 0.34, 5]} />
-        <meshLambertMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.5} />
-      </mesh>
+      <Hat hat={look.hat} />
       <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.42, 24]} />
         <meshBasicMaterial color="#000000" transparent opacity={0.3} />
