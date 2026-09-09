@@ -29,7 +29,7 @@ export const WALL_H = 3;
 export const DOOR_W = 3;
 export const PLAYER_R = 0.45;
 
-/** One is picked at random per run - any length works, rooms are generated. */
+/** One is picked at random per level - any length works, rooms are generated. */
 export const WORDS = [
   'ALISA',
   'CAT',
@@ -41,7 +41,21 @@ export const WORDS = [
   'BIRD',
   'APPLE',
   'FLOWER',
+  'ROCKET',
+  'PLANET',
+  'GARDEN',
+  'RAINBOW',
+  'UNICORN',
+  'DINOSAUR',
+  'ELEPHANT',
 ];
+
+/** Level 1 = 3-letter words, one letter longer per level, capped at the longest pool. */
+export function wordPoolForLevel(level: number): string[] {
+  const maxLen = Math.max(...WORDS.map((w) => w.length));
+  const len = Math.min(2 + Math.max(1, level), maxLen);
+  return WORDS.filter((w) => w.length === len);
+}
 
 export const PALETTE = [
   '#38bdf8',
@@ -102,8 +116,9 @@ function side(cx: number, cz: number, dir: Side, gap: boolean): WallBox[] {
       ];
 }
 
-/** Build the whole cave for a word: one room per letter, doors between neighbors. */
-export function buildLevel(word: string): Level {
+/** Build the whole cave for a word: one room per letter, doors between neighbors.
+ * difficulty 1 = open rooms, 2 = a few pillars, 3 = pillar per room, 4+ = two per room. */
+export function buildLevel(word: string, difficulty = 2): Level {
   const letters = word.toUpperCase().split('');
   const cells: Vec2[] = [[0, 0]];
   for (let i = 1; i < letters.length; i++) {
@@ -139,8 +154,12 @@ export function buildLevel(word: string): Level {
       if (dir === toPrev) continue; // that side was built by the previous room, with its door
       walls.push(...side(room.center[0], room.center[1], dir, dir === toNext));
     }
-    if (i > 0 && i < rooms.length - 1 && i % 2 === 1) {
+    const interior = i > 0 && i < rooms.length - 1;
+    if (interior && difficulty >= 2 && (difficulty >= 3 || i % 2 === 1)) {
       pillars.push({ x: room.center[0] - 1.6, z: room.center[1] - 1.4, hw: 0.55, hd: 0.55 });
+    }
+    if (interior && difficulty >= 4) {
+      pillars.push({ x: room.center[0] + 1.9, z: room.center[1] - 1.8, hw: 0.55, hd: 0.55 });
     }
   });
 
