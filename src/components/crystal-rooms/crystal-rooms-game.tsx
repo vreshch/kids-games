@@ -5,7 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { trackEvent } from '@/lib/analytics';
 import { playDoorOpen, playFanfare, playKeyChime, unlockCrystalAudio } from '@/lib/crystal-audio';
-import { HATS, loadLook, OUTFITS, saveLook, type PlayerLook } from '@/lib/crystal-player-look';
+import {
+  HATS,
+  loadLook,
+  OUTFIT_COLORS,
+  OUTFIT_STYLES,
+  saveLook,
+  type PlayerLook,
+} from '@/lib/crystal-player-look';
 import { buildLevel, wordPoolForLevel, type Level } from '@/lib/crystal-rooms-level';
 import { primeSpeech, speakLetter, speakWord } from '@/lib/crystal-speech';
 
@@ -54,18 +61,34 @@ function LetterHud({ level, collected }: { level: Level; collected: number[] }) 
 function LookPicker({ look, onChange }: { look: PlayerLook; onChange: (l: PlayerLook) => void }) {
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="flex gap-2.5">
-        {OUTFITS.map((o) => (
+      <div className="flex gap-2">
+        {OUTFIT_STYLES.map((o) => (
           <button
-            key={o.color}
+            key={o.id}
             type="button"
             suppressHydrationWarning
-            aria-label={`${o.name} outfit`}
-            className={`h-9 w-9 touch-manipulation rounded-full border-2 transition active:scale-90 ${
-              look.outfit === o.color ? 'scale-110 border-white' : 'border-white/25'
+            aria-label={o.name}
+            className={`flex h-11 w-11 touch-manipulation items-center justify-center rounded-xl border-2 text-2xl transition active:scale-90 ${
+              look.outfit === o.id ? 'border-teal-300 bg-teal-300/20' : 'border-white/15 bg-white/5'
             }`}
-            style={{ background: o.color }}
-            onClick={() => onChange({ ...look, outfit: o.color })}
+            onClick={() => onChange({ ...look, outfit: o.id })}
+          >
+            {o.emoji}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2.5">
+        {OUTFIT_COLORS.map((c) => (
+          <button
+            key={c.color}
+            type="button"
+            suppressHydrationWarning
+            aria-label={`${c.name} color`}
+            className={`h-9 w-9 touch-manipulation rounded-full border-2 transition active:scale-90 ${
+              look.color === c.color ? 'scale-110 border-white' : 'border-white/25'
+            }`}
+            style={{ background: c.color }}
+            onClick={() => onChange({ ...look, color: c.color })}
           />
         ))}
       </div>

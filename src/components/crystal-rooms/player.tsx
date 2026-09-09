@@ -66,6 +66,43 @@ function Hat({ hat }: { hat: PlayerLook['hat'] }) {
   return null;
 }
 
+function Outfit({ look }: { look: PlayerLook }) {
+  if (look.outfit === 'dress') {
+    return (
+      <group>
+        <mesh position={[0, 0.78, 0]}>
+          <capsuleGeometry args={[0.26, 0.35, 6, 14]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+        <mesh position={[0, 0.34, 0]}>
+          <coneGeometry args={[0.48, 0.72, 16]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+      </group>
+    );
+  }
+  if (look.outfit === 'cape') {
+    return (
+      <group>
+        <mesh position={[0, 0.55, 0]}>
+          <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
+          <meshLambertMaterial color={look.color} />
+        </mesh>
+        <mesh position={[0, 0.68, -0.27]} scale={[1, 1, 0.32]}>
+          <coneGeometry args={[0.42, 0.85, 12]} />
+          <meshLambertMaterial color={look.color} emissive={look.color} emissiveIntensity={0.25} />
+        </mesh>
+      </group>
+    );
+  }
+  return (
+    <mesh position={[0, 0.55, 0]}>
+      <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
+      <meshLambertMaterial color={look.color} />
+    </mesh>
+  );
+}
+
 export function Player({ level, input, collected, onCollect, frozen, look }: Props) {
   const group = useRef<Group>(null);
   const facing = useRef(Math.PI);
@@ -126,10 +163,7 @@ export function Player({ level, input, collected, onCollect, frozen, look }: Pro
   return (
     <group ref={group} position={[level.start[0], 0, level.start[1]]} rotation={[0, Math.PI, 0]}>
       <pointLight position={[0, 3.2, -0.5]} intensity={26} distance={17} color="#dbeafe" />
-      <mesh position={[0, 0.55, 0]}>
-        <capsuleGeometry args={[0.34, 0.45, 6, 14]} />
-        <meshLambertMaterial color={look.outfit} />
-      </mesh>
+      <Outfit look={look} />
       <mesh position={[0, 1.32, 0]}>
         <sphereGeometry args={[0.3, 20, 16]} />
         <meshLambertMaterial color="#fcd34d" />
