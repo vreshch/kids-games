@@ -1,5 +1,14 @@
 import { declareAudioSession } from '@/lib/audio-session';
-import type { Character } from '@/lib/sprunki-cast';
+
+export type Kind = 'kick' | 'snare' | 'hat' | 'blip' | 'note' | 'pad';
+
+/** What the clock needs to sing one character: a shape, a pitch, and a bar of steps. */
+export type Voice = {
+  kind: Kind;
+  frequency: number;
+  /** 16 steps of one bar; 0 rests, other values are semitones above `frequency`. */
+  pattern: number[];
+};
 
 const BPM = 100;
 const STEPS = 16;
@@ -14,7 +23,7 @@ let step = 0;
 let nextStepAt = 0;
 
 /** Every character on stage plays off this one clock, so the bar always lines up. */
-const playing = new Map<number, Character>();
+const playing = new Map<number, Voice>();
 
 function getContext() {
   if (!context) {
@@ -76,7 +85,7 @@ function tone(
 }
 
 /** One character's hit for this step. Each kind has its own shape, so voices stay apart. */
-function playHit(ctx: AudioContext, character: Character, semitone: number, at: number) {
+function playHit(ctx: AudioContext, character: Voice, semitone: number, at: number) {
   const frequency = character.frequency * 2 ** ((semitone - 1) / 12);
 
   if (character.kind === 'kick') {
@@ -117,7 +126,7 @@ function tick() {
 }
 
 /** Puts a character on the clock; the returned stop() takes it off again. */
-export function startVoice(slot: number, character: Character) {
+export function startVoice(slot: number, character: Voice) {
   const ctx = getContext();
   playing.set(slot, character);
 

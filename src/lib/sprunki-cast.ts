@@ -1,5 +1,6 @@
+import type { Kind } from '@/lib/beat-audio';
+
 export type Category = 'beat' | 'effect' | 'melody' | 'vocal';
-export type Kind = 'kick' | 'snare' | 'hat' | 'blip' | 'note' | 'pad';
 
 export type Character = {
   id: string;

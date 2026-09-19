@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { EmptySlot, SprunkiCharacter } from '@/components/sprunki-character';
-import { type Loop, primeAudio, startVoice } from '@/lib/spranki-audio';
+import { type Loop, primeAudio, startVoice } from '@/lib/beat-audio';
 import { CAST, type Character, SLOT_COUNT } from '@/lib/sprunki-cast';
 
 type Drag = { character: Character; x: number; y: number };
