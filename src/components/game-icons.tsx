@@ -68,3 +68,18 @@ export function CrystalIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function FrankieIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <ellipse cx={24} cy={30} rx={17} ry={16} fill="#fbbf24" />
+      <path d="M 24 15 Q 31 4 41 4 Q 35 13 27 16 Z" fill="#65a30d" />
+      <circle cx={17} cy={27} r={5} fill="#fffdf5" />
+      <circle cx={31} cy={27} r={5} fill="#fffdf5" />
+      <circle cx={18} cy={25} r={2.2} fill="#1a1a1a" />
+      <circle cx={32} cy={25} r={2.2} fill="#1a1a1a" />
+      <path d="M 16 36 Q 24 45 32 36 Z" fill="#1a1a1a" />
+      <path d="M 19 37 L 21 41 L 23 37 Z M 26 37 L 28 41 L 30 37 Z" fill="#fffdf5" />
+    </svg>
+  );
+}

@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 import type { ComponentType } from 'react';
 
-import { CrystalIcon, ParrotIcon, SmileIcon, SprankiIcon } from '@/components/game-icons';
+import {
+  CrystalIcon,
+  FrankieIcon,
+  ParrotIcon,
+  SmileIcon,
+  SprankiIcon,
+} from '@/components/game-icons';
 
 export type Game = {
   slug: string;
@@ -33,6 +39,13 @@ export const GAMES: Game[] = [
     tagline: 'Tap the characters, stack up a beat. Work in progress.',
     accent: '#a855f7',
     Icon: SprankiIcon,
+  },
+  {
+    slug: 'frankie',
+    title: 'Frankie',
+    tagline: 'Feed the singers fruit and hear what they turn into.',
+    accent: '#fbbf24',
+    Icon: FrankieIcon,
   },
   {
     slug: 'crystal-rooms',

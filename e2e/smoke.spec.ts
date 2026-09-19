@@ -27,6 +27,20 @@ test('crystal rooms shows the start overlay', async ({ page }) => {
   await expect(page.getByText('spell the secret word', { exact: false })).toBeVisible();
 });
 
+test('frankie feeds a singer a fruit', async ({ page }) => {
+  await page.goto('/frankie');
+  // The tray only answers once React has hydrated, so retry the first pick until it sticks.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Bam, a singer' }).click();
+    await expect(page.getByText('tap an empty spot to drop Bam')).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Empty spot 1' }).click();
+  await page.getByRole('button', { name: /^Mango/ }).click();
+  // Singers bob on stage forever, so Playwright never sees them settle.
+  await page.getByRole('button', { name: 'Feed Mango to Bam' }).click({ force: true });
+  await expect(page.getByRole('img', { name: 'Bam full of Mango' })).toBeVisible();
+});
+
 test('about tells the story', async ({ page }) => {
   await page.goto('/about');
   await expect(page.getByText('Alisa Vreshch')).toBeVisible();
