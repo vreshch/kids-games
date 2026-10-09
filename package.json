@@ -15,11 +15,11 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@agentage/observability": "^1.2.1",
+    "@agentage/observability": "^1.3.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "@vercel/otel": "^2.1.3",
-    "next": "16.3.7",
+    "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "three": "^0.186.1"
@@ -31,9 +31,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.186.0",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
     "eslint": "^9",
-    "eslint-config-next": "16.3.7",
+    "eslint-config-next": "16.3.8",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
