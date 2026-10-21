@@ -6,7 +6,7 @@ updates:
       interval: weekly
       day: friday
       time: '16:07'
-      timezone: Etc/UTC
+      timezone: 'Etc/UTC'
     assignees: ['vreshch']
     open-pull-requests-limit: 10
     ignore:
@@ -25,7 +25,7 @@ updates:
       interval: weekly
       day: friday
       time: '16:07'
-      timezone: Etc/UTC
+      timezone: 'Etc/UTC'
     assignees: ['vreshch']
     open-pull-requests-limit: 5
     groups:
@@ -38,7 +38,7 @@ updates:
       interval: weekly
       day: friday
       time: '16:07'
-      timezone: Etc/UTC
+      timezone: 'Etc/UTC'
     assignees: ['vreshch']
     open-pull-requests-limit: 5
     groups:
