@@ -2,7 +2,7 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, type RefObject } from 'react';
-import { Group, Vector3 } from 'three';
+import { type Group, Vector3 } from 'three';
 
 import type { PlayerLook } from '@/lib/crystal-player-look';
 import { collide, doorBox, PLAYER_R, type Level } from '@/lib/crystal-rooms-level';
