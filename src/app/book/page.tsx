@@ -10,7 +10,7 @@ import { GAMES } from '@/lib/games';
 export const metadata: Metadata = {
   title: 'Paper Book',
   description:
-    "Print Alisa's games as a little fold-up paper book with a QR code on every page - scan and play.",
+    "Print Alisa's games as a little paper book with a QR code on every page - scan and play.",
   alternates: { canonical: '/book' },
   openGraph: { title: 'Paper Book', url: '/book' },
 };
@@ -25,9 +25,9 @@ const PRINT_CSS = `
 
 const STEPS = [
   'Print in color on A4. If the colors come out missing, turn on "Background graphics".',
-  'Fold it into 8 boxes: in half the long way, then in half twice the short way. Open it up.',
-  'Fold it in half the short way and cut the red line, from the fold to the next crease only.',
-  'Open it, fold the long way with the pictures outside, push the ends together so the middle opens into a plus, and flatten it into a book with the cover on top.',
+  'Cut along the dashed lines into 8 cards.',
+  'Stack the cards by page number, with the cover on top.',
+  'Staple along the left edge, or punch a hole in the corner and tie a ribbon.',
 ];
 
 export default function BookPage() {
@@ -41,8 +41,8 @@ export default function BookPage() {
         </Link>
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Paper Book</h1>
         <p className="max-w-2xl text-balance text-neutral-300 sm:text-lg">
-          Print it, cut once, fold, and hand it out. Every game has its own QR code: point a phone
-          camera at it and the game opens right away.
+          Print it, cut it into cards, staple, and hand it out. Every game has its own QR code:
+          point a phone camera at it and the game opens right away.
         </p>
         <PrintButton />
         <ol className="grid max-w-4xl gap-3 text-sm text-neutral-300 sm:grid-cols-2 sm:text-base">

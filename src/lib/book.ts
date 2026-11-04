@@ -1,11 +1,8 @@
 import type { Game } from './games';
 import { SITE_URL } from './site';
 
-/** One A4 sheet folds into 8 pages: the cover, six games, the back. */
+/** One A4 sheet cuts into 8 cards: the cover, six games, the back. */
 export const GAMES_PER_SHEET = 6;
-
-/** Reading-order page number at each spot on the sheet; the top row prints upside down. */
-export const SHEET_LAYOUT = { top: [5, 4, 3, 2], bottom: [6, 7, 8, 1] } as const;
 
 export type BookPage =
   | { kind: 'cover'; sheet: number; sheets: number; games: Game[] }
@@ -13,7 +10,8 @@ export type BookPage =
   | { kind: 'draw'; number: number }
   | { kind: 'back' };
 
-export type BookSheet = { top: BookPage[]; bottom: BookPage[] };
+/** Pages in reading order, which is also the sheet order: left to right, top to bottom. */
+export type BookSheet = BookPage[];
 
 /** Read aloud by a grown-up, so short and concrete; the tagline covers any game added later. */
 const BLURBS: Record<string, string> = {
@@ -45,7 +43,6 @@ export function bookSheets(games: Game[]): BookSheet[] {
       pages.push(game ? { kind: 'game', game, number } : { kind: 'draw', number });
     }
     pages.push({ kind: 'back' });
-    const at = (number: number) => pages[number - 1];
-    return { top: SHEET_LAYOUT.top.map(at), bottom: SHEET_LAYOUT.bottom.map(at) };
+    return pages;
   });
 }

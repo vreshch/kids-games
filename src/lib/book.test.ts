@@ -16,26 +16,33 @@ const label = (page: BookPage) =>
   page.kind === 'game' ? page.game.slug : page.kind === 'draw' ? `draw${page.number}` : page.kind;
 
 describe('bookSheets', () => {
-  it('lays six games out so the folded sheet reads cover, 1-6, back', () => {
+  it('puts six games on one sheet in reading order: cover, games, back', () => {
     const [sheet, ...rest] = bookSheets(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
     expect(rest).toEqual([]);
-    expect(sheet.top.map(label)).toEqual(['d', 'c', 'b', 'a']);
-    expect(sheet.bottom.map(label)).toEqual(['e', 'f', 'back', 'cover']);
+    expect(sheet.map(label)).toEqual(['cover', 'a', 'b', 'c', 'd', 'e', 'f', 'back']);
   });
 
   it('numbers game pages from 2, right after the cover', () => {
     const [sheet] = bookSheets([game('a')]);
-    expect(sheet.top.at(-1)).toMatchObject({ kind: 'game', number: 2 });
+    expect(sheet[1]).toMatchObject({ kind: 'game', number: 2 });
   });
 
   it('starts a second book once the first is full, with draw-your-own pages to finish it', () => {
     const sheets = bookSheets(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(game));
     expect(sheets).toHaveLength(2);
-    expect(sheets[1].bottom.at(-1)).toMatchObject({ kind: 'cover', sheet: 2, sheets: 2 });
-    const cover = sheets[1].bottom.at(-1);
-    expect(cover?.kind === 'cover' && cover.games.map((g) => g.slug)).toEqual(['g', 'h']);
-    expect(sheets[1].top.map(label)).toEqual(['draw5', 'draw4', 'h', 'g']);
-    expect(sheets[1].bottom.map(label)).toEqual(['draw6', 'draw7', 'back', 'cover']);
+    const [cover] = sheets[1];
+    expect(cover).toMatchObject({ kind: 'cover', sheet: 2, sheets: 2 });
+    expect(cover.kind === 'cover' && cover.games.map((g) => g.slug)).toEqual(['g', 'h']);
+    expect(sheets[1].map(label)).toEqual([
+      'cover',
+      'g',
+      'h',
+      'draw4',
+      'draw5',
+      'draw6',
+      'draw7',
+      'back',
+    ]);
   });
 
   it('still prints one book with no games at all', () => {
