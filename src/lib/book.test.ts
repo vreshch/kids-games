@@ -51,23 +51,9 @@ describe('bookPages', () => {
 });
 
 describe('imposeSheet', () => {
-  const [pages] = bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
-  const { front, back } = imposeSheet(pages);
-
-  it('prints two copies per sheet, folded spreads 8|1 and 6|3 on the front', () => {
-    expect(front.map(label)).toEqual(['back', 'cover', 'e', 'b', 'back', 'cover', 'e', 'b']);
-  });
-
-  it('backs each page with its neighbor in the book once the sheet is turned over', () => {
-    expect(back.map(label)).toEqual(['c', 'd', 'a', 'f', 'c', 'd', 'a', 'f']);
-    // Turned over sideways, slot i of a row sits behind slot 3 - i.
-    const pairs = front.slice(0, 4).map((page, slot) => [label(page), label(back[3 - slot])]);
-    expect(pairs).toEqual([
-      ['back', 'f'],
-      ['cover', 'a'],
-      ['e', 'd'],
-      ['b', 'c'],
-    ]);
+  it('lays the pages out so one cut and a few folds read cover, 2-7, back', () => {
+    const [pages] = bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
+    expect(imposeSheet(pages).map(label)).toEqual(['d', 'c', 'b', 'a', 'e', 'f', 'back', 'cover']);
   });
 });
 

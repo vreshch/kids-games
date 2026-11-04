@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Fredoka } from 'next/font/google';
 import Link from 'next/link';
 
-import { BookSide } from '@/components/book/book-sheet';
+import { BookSheet } from '@/components/book/book-sheet';
 import { PrintButton } from '@/components/book/print-button';
 import { bookPages, imposeSheet } from '@/lib/book';
 import { GAMES } from '@/lib/games';
@@ -10,7 +10,7 @@ import { GAMES } from '@/lib/games';
 export const metadata: Metadata = {
   title: 'Paper Book',
   description:
-    "Print Alisa's games as a little paper book with a QR code on every page - scan and play.",
+    "Print Alisa's games as a little fold-up paper book with a QR code on every page - scan and play.",
   alternates: { canonical: '/book' },
   openGraph: { title: 'Paper Book', url: '/book' },
 };
@@ -24,10 +24,10 @@ const PRINT_CSS = `
 `;
 
 const STEPS = [
-  'Print in color on A4, two-sided, "Flip on short edge". One sheet makes two books. If the back comes out upside down, switch to the other flip option.',
-  'Cut along the dashed cross into 4 pieces.',
-  'Fold each piece in half along the dotted line, pictures outside.',
-  'Slide the piece with page 3 inside the one with the cover, then staple the fold twice.',
+  'Print in color on A4, one side. If the colors come out missing, turn on "Background graphics".',
+  'Fold it into 8 boxes: in half the long way, then in half twice the short way. Open it up.',
+  'Fold it in half the short way and cut the red line, from the fold to the next crease only.',
+  'Open it, fold the long way with the pictures outside, push the ends together so the middle opens into a plus, and flatten it into a book with the cover on top.',
 ];
 
 export default function BookPage() {
@@ -41,8 +41,9 @@ export default function BookPage() {
         </Link>
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Paper Book</h1>
         <p className="max-w-2xl text-balance text-neutral-300 sm:text-lg">
-          Print it on both sides, cut, fold, staple, and hand it out. Every game has its own QR
-          code: point a phone camera at it and the game opens right away.
+          Print it, cut once, fold, and hand it out. The upside-down pages turn the right way up
+          when folded. Every game has its own QR code: point a phone camera at it and the game opens
+          right away.
         </p>
         <PrintButton />
         <ol className="grid max-w-4xl gap-3 text-sm text-neutral-300 sm:grid-cols-2 sm:text-base">
@@ -57,14 +58,9 @@ export default function BookPage() {
         </ol>
       </header>
       <div className={`${fredoka.className} flex flex-col gap-8 print:gap-0`}>
-        {books.map((pages, index) => {
-          const { front, back } = imposeSheet(pages);
-          const of = books.length > 1 ? ` of book ${index + 1}` : '';
-          return [
-            <BookSide key={`${index}-front`} pages={front} label={`Front side${of}`} guides />,
-            <BookSide key={`${index}-back`} pages={back} label={`Back side${of}`} />,
-          ];
-        })}
+        {books.map((pages, index) => (
+          <BookSheet key={index} slots={imposeSheet(pages)} label={`Book ${index + 1}`} />
+        ))}
       </div>
     </main>
   );
