@@ -46,6 +46,16 @@ test('about tells the story', async ({ page }) => {
   await expect(page.getByText('Alisa Vreshch')).toBeVisible();
 });
 
+test('paper book has a working QR code page for every game', async ({ page }) => {
+  await page.goto('/book');
+  await expect(page.getByRole('heading', { name: 'Paper Book' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Print the book/ })).toBeVisible();
+  for (const game of GAMES) {
+    await expect(page.getByRole('img', { name: `QR code for ${game.title}` })).toBeVisible();
+  }
+  await expect(page.getByRole('img', { name: 'QR code for all the games' })).toBeVisible();
+});
+
 test('unknown routes get the kid-friendly 404', async ({ page }) => {
   await page.goto('/no-such-game');
   await expect(page.getByText('This room is empty!')).toBeVisible();

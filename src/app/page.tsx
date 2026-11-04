@@ -40,6 +40,10 @@ export default function Home() {
           About
         </Link>
         <span aria-hidden>·</span>
+        <Link href="/book" className="text-teal-500 underline underline-offset-4">
+          Paper book
+        </Link>
+        <span aria-hidden>·</span>
         <a
           href="https://github.com/vreshch/kids-games"
           className="text-teal-500 underline underline-offset-4"
