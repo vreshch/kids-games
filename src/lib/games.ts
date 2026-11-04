@@ -7,6 +7,7 @@ import {
   ParrotIcon,
   SmileIcon,
   SprankiIcon,
+  WiggleIcon,
 } from '@/components/game-icons';
 
 export type Game = {
@@ -53,6 +54,13 @@ export const GAMES: Game[] = [
     tagline: 'Walk the crystal caves, find the letter keys, spell the word.',
     accent: '#2dd4bf',
     Icon: CrystalIcon,
+  },
+  {
+    slug: 'wiggle-snakes',
+    title: 'Wiggle Snakes',
+    tagline: 'Eat glowing dots, grow huge, tap the super button to gobble every snake.',
+    accent: '#f472b6',
+    Icon: WiggleIcon,
   },
 ];
 
