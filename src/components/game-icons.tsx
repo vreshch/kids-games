@@ -83,3 +83,33 @@ export function FrankieIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function WiggleIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <path
+        d="M 8 40 Q 4 28 14 26 Q 24 24 22 15 Q 21 7 30 7"
+        fill="none"
+        stroke="#f472b6"
+        strokeWidth={9}
+        strokeLinecap="round"
+      />
+      <path
+        d="M 8 40 Q 4 28 14 26 Q 24 24 22 15 Q 21 7 30 7"
+        fill="none"
+        stroke="#fbcfe8"
+        strokeWidth={9}
+        strokeLinecap="round"
+        strokeDasharray="5 7"
+      />
+      <circle cx={34} cy={9} r={8} fill="#f472b6" />
+      <circle cx={33} cy={6} r={3} fill="#fffdf5" />
+      <circle cx={38} cy={9} r={3} fill="#fffdf5" />
+      <circle cx={34} cy={6} r={1.4} fill="#1a1a1a" />
+      <circle cx={39} cy={9} r={1.4} fill="#1a1a1a" />
+      <circle cx={42} cy={28} r={3} fill="#facc15" />
+      <circle cx={30} cy={38} r={2.5} fill="#38bdf8" />
+      <circle cx={40} cy={42} r={2} fill="#4ade80" />
+    </svg>
+  );
+}

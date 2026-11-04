@@ -50,3 +50,17 @@ test('unknown routes get the kid-friendly 404', async ({ page }) => {
   await page.goto('/no-such-game');
   await expect(page.getByText('This room is empty!')).toBeVisible();
 });
+
+test('wiggle snakes starts and the super button fires', async ({ page }) => {
+  await page.goto('/wiggle-snakes');
+  await expect(page.getByText('Eat the glowing dots', { exact: false })).toBeVisible();
+  // Play only answers once React has hydrated, so retry until the in-game HUD shows up.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Play', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Super power' })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await expect(page.getByText('Biggest snakes')).toBeVisible();
+  await expect(page.getByText('SUPER!')).toBeVisible();
+  await page.getByRole('button', { name: 'Super power' }).click();
+  await expect(page.getByText('SUPER!')).toBeHidden();
+});
