@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { blurbFor, bookSheets, playUrl, type BookPage } from './book';
+import { blurbFor, bookPages, imposeSheet, playUrl, type BookPage } from './book';
 import { qrShape } from './book-qr';
 import type { Game } from './games';
 
@@ -15,20 +15,20 @@ const game = (slug: string): Game => ({
 const label = (page: BookPage) =>
   page.kind === 'game' ? page.game.slug : page.kind === 'draw' ? `draw${page.number}` : page.kind;
 
-describe('bookSheets', () => {
+describe('bookPages', () => {
   it('puts six games on one sheet in reading order: cover, games, back', () => {
-    const [sheet, ...rest] = bookSheets(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
+    const [sheet, ...rest] = bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
     expect(rest).toEqual([]);
     expect(sheet.map(label)).toEqual(['cover', 'a', 'b', 'c', 'd', 'e', 'f', 'back']);
   });
 
   it('numbers game pages from 2, right after the cover', () => {
-    const [sheet] = bookSheets([game('a')]);
+    const [sheet] = bookPages([game('a')]);
     expect(sheet[1]).toMatchObject({ kind: 'game', number: 2 });
   });
 
   it('starts a second book once the first is full, with draw-your-own pages to finish it', () => {
-    const sheets = bookSheets(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(game));
+    const sheets = bookPages(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(game));
     expect(sheets).toHaveLength(2);
     const [cover] = sheets[1];
     expect(cover).toMatchObject({ kind: 'cover', sheet: 2, sheets: 2 });
@@ -46,7 +46,28 @@ describe('bookSheets', () => {
   });
 
   it('still prints one book with no games at all', () => {
-    expect(bookSheets([])).toHaveLength(1);
+    expect(bookPages([])).toHaveLength(1);
+  });
+});
+
+describe('imposeSheet', () => {
+  const [pages] = bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
+  const { front, back } = imposeSheet(pages);
+
+  it('prints two copies per sheet, folded spreads 8|1 and 6|3 on the front', () => {
+    expect(front.map(label)).toEqual(['back', 'cover', 'e', 'b', 'back', 'cover', 'e', 'b']);
+  });
+
+  it('backs each page with its neighbor in the book once the sheet is turned over', () => {
+    expect(back.map(label)).toEqual(['c', 'd', 'a', 'f', 'c', 'd', 'a', 'f']);
+    // Turned over sideways, slot i of a row sits behind slot 3 - i.
+    const pairs = front.slice(0, 4).map((page, slot) => [label(page), label(back[3 - slot])]);
+    expect(pairs).toEqual([
+      ['back', 'f'],
+      ['cover', 'a'],
+      ['e', 'd'],
+      ['b', 'c'],
+    ]);
   });
 });
 

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Fredoka } from 'next/font/google';
 import Link from 'next/link';
 
-import { BookSheet } from '@/components/book/book-sheet';
+import { BookSide } from '@/components/book/book-sheet';
 import { PrintButton } from '@/components/book/print-button';
-import { bookSheets } from '@/lib/book';
+import { bookPages, imposeSheet } from '@/lib/book';
 import { GAMES } from '@/lib/games';
 
 export const metadata: Metadata = {
@@ -24,14 +24,14 @@ const PRINT_CSS = `
 `;
 
 const STEPS = [
-  'Print in color on A4. If the colors come out missing, turn on "Background graphics".',
-  'Cut along the dashed lines into 8 cards.',
-  'Stack the cards by page number, with the cover on top.',
-  'Staple along the left edge, or punch a hole in the corner and tie a ribbon.',
+  'Print in color on A4, two-sided, "Flip on short edge". One sheet makes two books. If the back comes out upside down, switch to the other flip option.',
+  'Cut along the dashed cross into 4 pieces.',
+  'Fold each piece in half along the dotted line, pictures outside.',
+  'Slide the piece with page 3 inside the one with the cover, then staple the fold twice.',
 ];
 
 export default function BookPage() {
-  const sheets = bookSheets(GAMES);
+  const books = bookPages(GAMES);
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12 print:max-w-none print:gap-0 print:p-0">
       <style>{PRINT_CSS}</style>
@@ -41,8 +41,8 @@ export default function BookPage() {
         </Link>
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Paper Book</h1>
         <p className="max-w-2xl text-balance text-neutral-300 sm:text-lg">
-          Print it, cut it into cards, staple, and hand it out. Every game has its own QR code:
-          point a phone camera at it and the game opens right away.
+          Print it on both sides, cut, fold, staple, and hand it out. Every game has its own QR
+          code: point a phone camera at it and the game opens right away.
         </p>
         <PrintButton />
         <ol className="grid max-w-4xl gap-3 text-sm text-neutral-300 sm:grid-cols-2 sm:text-base">
@@ -57,9 +57,14 @@ export default function BookPage() {
         </ol>
       </header>
       <div className={`${fredoka.className} flex flex-col gap-8 print:gap-0`}>
-        {sheets.map((sheet, index) => (
-          <BookSheet key={index} sheet={sheet} index={index} />
-        ))}
+        {books.map((pages, index) => {
+          const { front, back } = imposeSheet(pages);
+          const of = books.length > 1 ? ` of book ${index + 1}` : '';
+          return [
+            <BookSide key={`${index}-front`} pages={front} label={`Front side${of}`} guides />,
+            <BookSide key={`${index}-back`} pages={back} label={`Back side${of}`} />,
+          ];
+        })}
       </div>
     </main>
   );

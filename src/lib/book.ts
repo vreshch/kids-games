@@ -1,8 +1,15 @@
 import type { Game } from './games';
 import { SITE_URL } from './site';
 
-/** One A4 sheet cuts into 8 cards: the cover, six games, the back. */
+/** A book has 8 pages: the cover, six games, the back. */
 export const GAMES_PER_SHEET = 6;
+
+/**
+ * Printed on both sides, each A4 half-row is a spread that folds in half: 8|1 outside with
+ * 2|7 behind it, 6|3 with 4|5 behind it. Two rows make two books from one sheet.
+ */
+const FRONT = [8, 1, 6, 3];
+const BACK = [4, 5, 2, 7];
 
 export type BookPage =
   | { kind: 'cover'; sheet: number; sheets: number; games: Game[] }
@@ -10,8 +17,8 @@ export type BookPage =
   | { kind: 'draw'; number: number }
   | { kind: 'back' };
 
-/** Pages in reading order, which is also the sheet order: left to right, top to bottom. */
-export type BookSheet = BookPage[];
+/** Both sides of one sheet, each as 8 page slots: left to right, top to bottom. */
+export type BookSheet = { front: BookPage[]; back: BookPage[] };
 
 /** Read aloud by a grown-up, so short and concrete; the tagline covers any game added later. */
 const BLURBS: Record<string, string> = {
@@ -32,7 +39,8 @@ export function playUrl(slug = ''): string {
   return `${SITE_URL}/${slug}?utm_source=paper-book`;
 }
 
-export function bookSheets(games: Game[]): BookSheet[] {
+/** Each book's pages in reading order. */
+export function bookPages(games: Game[]): BookPage[][] {
   const sheets = Math.max(1, Math.ceil(games.length / GAMES_PER_SHEET));
   return Array.from({ length: sheets }, (_, index) => {
     const inside = games.slice(index * GAMES_PER_SHEET, (index + 1) * GAMES_PER_SHEET);
@@ -45,4 +53,9 @@ export function bookSheets(games: Game[]): BookSheet[] {
     pages.push({ kind: 'back' });
     return pages;
   });
+}
+
+export function imposeSheet(pages: BookPage[]): BookSheet {
+  const row = (order: number[]) => order.map((number) => pages[number - 1]);
+  return { front: [...row(FRONT), ...row(FRONT)], back: [...row(BACK), ...row(BACK)] };
 }
