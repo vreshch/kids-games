@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { blurbFor, bookPages, imposeSheet, playUrl, type BookPage } from './book';
+import { blurbFor, bookPages, imposeSheets, playUrl, type BookPage } from './book';
 import { qrShape } from './book-qr';
 import type { Game } from './games';
 
@@ -50,10 +50,40 @@ describe('bookPages', () => {
   });
 });
 
-describe('imposeSheet', () => {
-  it('lays the pages out so one cut and a few folds read cover, 2-7, back', () => {
-    const [pages] = bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game));
-    expect(imposeSheet(pages).map(label)).toEqual(['d', 'c', 'b', 'a', 'e', 'f', 'back', 'cover']);
+describe('imposeSheets', () => {
+  const pageNumber = (page: BookPage) =>
+    page.kind === 'cover' ? 1 : page.kind === 'back' ? 8 : page.number;
+
+  it('backs each page with its neighbour when the sheet flips on the short edge', () => {
+    const [{ front, back }] = imposeSheets(bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game)));
+    // Flipping on the short edge mirrors columns: front slot i sits on back slot (row end - i).
+    const behind = (slot: number) => back[Math.floor(slot / 4) * 4 + (3 - (slot % 4))];
+    const pairs = front.map((page, slot) => [pageNumber(page), pageNumber(behind(slot))].sort());
+    // Real paper: 1|2, 3|4, 5|6, 7|8 are the two sides of one leaf.
+    expect(pairs.slice(0, 4)).toEqual([
+      [7, 8],
+      [1, 2],
+      [5, 6],
+      [3, 4],
+    ]);
+  });
+
+  it('reads cover, 2-7, back once the second card nests in the cover card', () => {
+    const [{ front, back }] = imposeSheets(bookPages(['a', 'b', 'c', 'd', 'e', 'f'].map(game)));
+    // Outer card outside: back | cover, inside: 2 | 7; inner card outside: 6 | 3, inside: 4 | 5.
+    expect(front.slice(0, 4).map(label)).toEqual(['back', 'cover', 'e', 'b']);
+    expect(back.slice(0, 4).map(label)).toEqual(['c', 'd', 'a', 'f']);
+  });
+
+  it('fits two books on a sheet and repeats an odd one out', () => {
+    const books = bookPages('abcdefghijklm'.split('').map(game));
+    expect(books).toHaveLength(3);
+    const sheets = imposeSheets(books);
+    expect(sheets).toHaveLength(2);
+    expect(sheets[0].front[1]).toMatchObject({ kind: 'cover', sheet: 1 });
+    expect(sheets[0].front[5]).toMatchObject({ kind: 'cover', sheet: 2 });
+    expect(sheets[1].front[1]).toMatchObject({ kind: 'cover', sheet: 3 });
+    expect(sheets[1].front[5]).toMatchObject({ kind: 'cover', sheet: 3 });
   });
 });
 

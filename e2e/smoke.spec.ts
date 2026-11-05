@@ -51,9 +51,11 @@ test('paper book has a working QR code page for every game', async ({ page }) =>
   await expect(page.getByRole('heading', { name: 'Paper Book' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Print the book/ })).toBeVisible();
   for (const game of GAMES) {
-    await expect(page.getByRole('img', { name: `QR code for ${game.title}` })).toBeVisible();
+    await expect(
+      page.getByRole('img', { name: `QR code for ${game.title}` }).first()
+    ).toBeVisible();
   }
-  await expect(page.getByRole('img', { name: 'QR code for all the games' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'QR code for all the games' }).first()).toBeVisible();
 });
 
 test('unknown routes get the kid-friendly 404', async ({ page }) => {

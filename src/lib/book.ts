@@ -5,11 +5,14 @@ import { SITE_URL } from './site';
 export const GAMES_PER_SHEET = 6;
 
 /**
- * Page number at each sheet slot, left to right, top to bottom, for a one-cut fold-up book.
- * The top row prints upside down; folding turns it the right way up.
+ * Page numbers at each slot of one book's row, left to right, for a sheet printed on both sides
+ * and flipped on the short edge. The row cuts into two cards: the cover card (back | cover outside,
+ * 2 | 7 inside) wraps the middle card (6 | 3 outside, 4 | 5 inside), and one fold makes the book.
  */
-const SHEET_LAYOUT = [5, 4, 3, 2, 6, 7, 8, 1];
-export const UPSIDE_DOWN_SLOTS = 4;
+const FRONT_ROW = [8, 1, 6, 3];
+const BACK_ROW = [4, 5, 2, 7];
+
+export type SheetSides = { front: BookPage[]; back: BookPage[] };
 
 export type BookPage =
   | { kind: 'cover'; sheet: number; sheets: number; games: Game[] }
@@ -52,6 +55,13 @@ export function bookPages(games: Game[]): BookPage[][] {
   });
 }
 
-export function imposeSheet(pages: BookPage[]): BookPage[] {
-  return SHEET_LAYOUT.map((number) => pages[number - 1]);
+/** Two books per sheet, one per row; an odd book out is printed twice so no half-sheet goes blank. */
+export function imposeSheets(books: BookPage[][]): SheetSides[] {
+  const sheets: SheetSides[] = [];
+  for (let i = 0; i < books.length; i += 2) {
+    const rows = [books[i], books[i + 1] ?? books[i]];
+    const side = (layout: number[]) => rows.flatMap((pages) => layout.map((n) => pages[n - 1]));
+    sheets.push({ front: side(FRONT_ROW), back: side(BACK_ROW) });
+  }
+  return sheets;
 }
