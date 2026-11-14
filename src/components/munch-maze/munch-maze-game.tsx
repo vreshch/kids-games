@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'rea
 
 import { trackEvent } from '@/lib/analytics';
 import {
+  cheer,
   playBerry,
   playCaught,
   playGobble,
@@ -49,6 +50,14 @@ const viewOf = (w: World): View => ({
   round: w.round,
 });
 
+const SOUNDS: Partial<Record<MazeEvent['type'], () => void>> = {
+  star: () => (playStar(), cheer('star')),
+  gobble: () => (playGobble(), cheer('gobble')),
+  clear: () => (playStar(), cheer('clear')),
+  caught: () => (playCaught(), cheer('caught')),
+  over: playCaught,
+};
+
 const BANNER: Record<Phase, (v: View) => string> = {
   roll: () => 'Your turn! Tap the die 🎲',
   walk: (v) => `Walk ${v.left} more step${v.left === 1 ? '' : 's'}`,
@@ -68,9 +77,7 @@ export function MunchMazeGame() {
   const onEvent = useCallback((event: MazeEvent, world: World) => {
     if (event.type === 'step') sayNumber(event.count);
     else if (event.type === 'berry') playBerry();
-    else if (event.type === 'star') playStar();
-    else if (event.type === 'gobble') playGobble();
-    else if (event.type === 'caught' || event.type === 'over') playCaught();
+    else SOUNDS[event.type]?.();
     if (event.type === 'over') trackEvent('game_over', { ...GAME, score: String(world.score) });
     setView(viewOf(world));
   }, []);

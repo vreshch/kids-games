@@ -4,18 +4,32 @@ import { useEffect, useRef, type RefObject } from 'react';
 
 import { createWorld, stepClouds, type MazeEvent, type World } from '@/lib/munch-maze-world';
 
-import {
-  drawBoard,
-  drawCloud,
-  drawMunchy,
-  fitBoard,
-  glide,
-  type Board,
-  type Shown,
-} from './render';
+import { confetti, createEffects, popup, sparkle, stepEffects, type Effects } from './effects';
+import { drawScene, fitBoard, glide, type Board, type Shown } from './render';
 
-const CLOUD_STEP_MS = 260;
+const CLOUD_STEP_MS = 140;
 type Callbacks = { onEvent: (event: MazeEvent, world: World) => void };
+
+/** Turns game events into sparkles, confetti, popups and shakes. */
+function celebrate(fx: Effects, event: MazeEvent, world: World) {
+  const p = { x: world.player.x + 0.5, y: world.player.y + 0.5 };
+  if (event.type === 'berry') {
+    sparkle(fx, p.x, p.y, '#fb7185', 6);
+    popup(fx, p.x, p.y - 0.3, '+10', '#fecdd3');
+  } else if (event.type === 'star') {
+    sparkle(fx, p.x, p.y, '#fde047', 16);
+    popup(fx, p.x, p.y - 0.4, 'SUPER!', '#fde047');
+  } else if (event.type === 'gobble') {
+    confetti(fx, p.x, p.y, 30);
+    popup(fx, p.x, p.y - 0.4, 'YUM! +200', '#fde047');
+    fx.shake = 0.25;
+  } else if (event.type === 'clear') {
+    confetti(fx, world.level.cols / 2, world.level.rows / 2, 120);
+  } else if (event.type === 'caught' || event.type === 'over') {
+    fx.shake = 0.4;
+    sparkle(fx, p.x, p.y, '#93c5fd', 12);
+  }
+}
 
 /** Owns the world, the clouds' step timer and the draw loop. */
 export function useMazeLoop(canvasRef: RefObject<HTMLCanvasElement | null>, callbacks: Callbacks) {
@@ -55,6 +69,7 @@ export function useMazeLoop(canvasRef: RefObject<HTMLCanvasElement | null>, call
     let last = performance.now();
     let cloudAt = 0;
     let raf = 0;
+    const fx = createEffects();
     const frame = (now: number) => {
       const world = worldRef.current!;
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -63,7 +78,10 @@ export function useMazeLoop(canvasRef: RefObject<HTMLCanvasElement | null>, call
         cloudAt = now;
         stepClouds(world);
       }
-      for (const event of world.events) callbacksRef.current.onEvent(event, world);
+      for (const event of world.events) {
+        celebrate(fx, event, world);
+        callbacksRef.current.onEvent(event, world);
+      }
       world.events.length = 0;
 
       const board = fitBoard(world, screen.w, screen.h);
@@ -71,11 +89,17 @@ export function useMazeLoop(canvasRef: RefObject<HTMLCanvasElement | null>, call
       ctx.setTransform(screen.dpr, 0, 0, screen.dpr, 0, 0);
       ctx.fillStyle = '#0b0820';
       ctx.fillRect(0, 0, screen.w, screen.h);
-      drawBoard(ctx, world, board, now);
-      for (const cloud of world.clouds) {
-        drawCloud(ctx, world, cloud, board, spot(`c${cloud.id}`, cloud.x, cloud.y, dt), now);
-      }
-      drawMunchy(ctx, world, board, spot('p', world.player.x, world.player.y, dt), now);
+      stepEffects(fx, dt);
+      drawScene(ctx, world, {
+        b: board,
+        dpr: screen.dpr,
+        now,
+        fx,
+        spot: (key) => {
+          const target = key === 'p' ? world.player : world.clouds[Number(key.slice(1))];
+          return spot(key, target.x, target.y, dt);
+        },
+      });
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
