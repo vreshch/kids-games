@@ -7,7 +7,7 @@ import { createWorld, stepClouds, type MazeEvent, type World } from '@/lib/munch
 import { confetti, createEffects, popup, sparkle, stepEffects, type Effects } from './effects';
 import { drawScene, fitBoard, glide, type Board, type Shown } from './render';
 
-const CLOUD_STEP_MS = 140;
+const CLOUD_STEP_MS = 180;
 type Callbacks = { onEvent: (event: MazeEvent, world: World) => void };
 
 /** Turns game events into sparkles, confetti, popups and shakes. */
@@ -74,7 +74,8 @@ export function useMazeLoop(canvasRef: RefObject<HTMLCanvasElement | null>, call
       const world = worldRef.current!;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      if (world.phase === 'clouds' && now - cloudAt > CLOUD_STEP_MS) {
+      if (world.phase !== 'clouds') cloudAt = now;
+      else if (now - cloudAt > CLOUD_STEP_MS) {
         cloudAt = now;
         stepClouds(world);
       }

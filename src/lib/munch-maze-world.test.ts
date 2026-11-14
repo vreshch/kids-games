@@ -78,13 +78,14 @@ describe('turns', () => {
     expect(world.stepsLeft).toBe(1);
   });
 
-  it('runs the cloud queue then gives the die back', () => {
+  it('moves all clouds together, one hop per tick, then gives the die back', () => {
     const world = createWorld(fixed(0));
     rollDie(world);
     stepPlayer(world, openDir(world));
-    expect(world.queue).toHaveLength(cloudSteps(1) * 4);
-    for (let i = 0; i < 20 && world.phase === 'clouds'; i++) stepClouds(world);
+    expect(world.cloudHops).toBe(cloudSteps(1));
+    for (let i = 0; i < cloudSteps(1); i++) stepClouds(world);
     expect(world.phase).toBe('roll');
+    expect(world.events.at(-1)?.type).toBe('turn');
   });
 
   it('speeds the clouds up slowly with the round', () => {

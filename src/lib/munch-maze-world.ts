@@ -12,7 +12,7 @@ import {
 /** roll: waiting for the die · walk: player steps · clouds: clouds step · caught/clear: pause. */
 export type Phase = 'roll' | 'walk' | 'clouds' | 'caught' | 'clear' | 'over';
 export type MazeEvent =
-  | { type: 'berry' | 'star' | 'caught' | 'clear' | 'over' | 'clouds' }
+  | { type: 'berry' | 'star' | 'caught' | 'clear' | 'over' | 'clouds' | 'turn' }
   | { type: 'step'; left: number; count: number }
   | { type: 'gobble'; cloud: Cloud };
 
@@ -30,7 +30,8 @@ export type World = {
   stepsLeft: number;
   /** Cloud turns left while the clouds are scared. */
   power: number;
-  queue: number[];
+  /** Hops left in the clouds' turn; every cloud moves one tile per hop. */
+  cloudHops: number;
   events: MazeEvent[];
   rng: () => number;
 };
@@ -54,7 +55,7 @@ export function createWorld(rng: () => number = Math.random): World {
     die: 0,
     stepsLeft: 0,
     power: 0,
-    queue: [],
+    cloudHops: 0,
     events: [],
     rng,
   };
@@ -93,29 +94,28 @@ export function stepPlayer(world: World, dir: Dir): boolean {
 
 function startCloudTurn(world: World) {
   world.phase = 'clouds';
-  world.queue = [];
-  const steps = world.power > 0 ? 1 : cloudSteps(world.round);
-  for (let i = 0; i < steps; i++) for (const c of world.clouds) world.queue.push(c.id);
+  world.cloudHops = world.power > 0 ? 1 : cloudSteps(world.round);
   for (const cloud of world.clouds) {
     if (cloud.mode === 'wait' && --cloud.wait <= 0) cloud.mode = 'leave';
   }
   world.events.push({ type: 'clouds' });
 }
 
-/** Moves the next cloud in line by one tile; the UI calls this on a timer so kids can watch. */
+/** One hop: every cloud that is out moves one tile at the same time. */
 export function stepClouds(world: World) {
   if (world.phase !== 'clouds') return;
-  const id = world.queue.shift();
-  const cloud = world.clouds.find((c) => c.id === id);
-  if (cloud && cloud.mode !== 'wait') {
+  for (const cloud of world.clouds) {
+    if (cloud.mode === 'wait') continue;
     const scared = world.power > 0 && cloud.mode === 'chase';
     const target = cloudTarget(cloud, world.player, world.level);
     moveCloud(world.level, cloud, { target, scared, rng: world.rng });
     if (meet(world, cloud)) return;
   }
-  if (world.queue.length > 0) return;
+  world.cloudHops -= 1;
+  if (world.cloudHops > 0) return;
   world.power = Math.max(0, world.power - 1);
   world.phase = 'roll';
+  world.events.push({ type: 'turn' });
 }
 
 function eat(world: World) {
