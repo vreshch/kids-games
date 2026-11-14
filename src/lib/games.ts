@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import {
   CrystalIcon,
   FrankieIcon,
+  MunchIcon,
   ParrotIcon,
   SmileIcon,
   SprankiIcon,
@@ -61,6 +62,13 @@ export const GAMES: Game[] = [
     tagline: 'Eat glowing dots, grow huge, tap the super button to gobble every snake.',
     accent: '#f472b6',
     Icon: WiggleIcon,
+  },
+  {
+    slug: 'munch-maze',
+    title: 'Munch Maze',
+    tagline: 'Roll the die, count your steps, munch the berries, dodge the grumpy clouds.',
+    accent: '#34d399',
+    Icon: MunchIcon,
   },
 ];
 

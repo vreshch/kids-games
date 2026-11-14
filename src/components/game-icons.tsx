@@ -113,3 +113,27 @@ export function WiggleIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function MunchIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <path
+        d="M 14 12 L 10 5 M 26 12 L 30 5"
+        stroke="#34d399"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+      <circle cx={10} cy={5} r={2.5} fill="#fde047" />
+      <circle cx={30} cy={5} r={2.5} fill="#fde047" />
+      <circle cx={20} cy={24} r={14} fill="#34d399" />
+      <circle cx={15} cy={20} r={4} fill="#fffdf5" />
+      <circle cx={25} cy={20} r={4} fill="#fffdf5" />
+      <circle cx={16} cy={20} r={1.8} fill="#111827" />
+      <circle cx={26} cy={20} r={1.8} fill="#111827" />
+      <ellipse cx={20} cy={30} rx={6} ry={3} fill="#7f1d1d" />
+      <circle cx={39} cy={24} r={2.5} fill="#fda4af" />
+      <circle cx={39} cy={34} r={2.5} fill="#fda4af" />
+      <circle cx={30} cy={42} r={2.5} fill="#fda4af" />
+    </svg>
+  );
+}
