@@ -130,3 +130,65 @@ body {
     animation: none;
   }
 }
+
+/* Secret Pet Land: pets hop, the rock wobbles, bubbles float, confetti falls */
+@keyframes spl-hop {
+  50% {
+    transform: translateY(-14%);
+  }
+}
+
+.animate-spl-hop {
+  animation: spl-hop 1s infinite;
+}
+
+.animate-spl-peek {
+  animation: spl-hop 0.6s infinite;
+}
+
+@keyframes spl-wobble {
+  25% {
+    transform: translateX(-6%) rotate(-6deg);
+  }
+  75% {
+    transform: translateX(6%) rotate(6deg);
+  }
+}
+
+.animate-spl-wobble {
+  animation: spl-wobble 0.25s 2;
+}
+
+@keyframes spl-bubble {
+  50% {
+    transform: translateY(-8px);
+    opacity: 0.5;
+  }
+}
+
+.animate-spl-bubble {
+  animation: spl-bubble 1.6s infinite;
+}
+
+@keyframes spl-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.25);
+  }
+}
+
+.animate-spl-pop {
+  animation: spl-pop 0.5s;
+}
+
+@keyframes spl-fall {
+  to {
+    transform: translateY(110vh) rotate(540deg);
+  }
+}
+
+.animate-spl-fall {
+  animation: spl-fall 2.2s linear forwards;
+}
