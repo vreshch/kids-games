@@ -74,7 +74,7 @@ export function usePetLand(initial: World) {
 
   const reset = () => {
     if (!resetArmed) return setResetArmed(true);
-    commit(resetWorld());
+    commit(resetWorld(world));
     closeOverlay();
   };
 

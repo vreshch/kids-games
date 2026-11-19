@@ -49,8 +49,8 @@ export const createWorld = (look: Look = DEFAULT_LOOK, found: PetId[] = []): Wor
   puzzles: freshPuzzles(),
 });
 
-/** Start over keeps nothing, not even the outfit. */
-export const resetWorld = (): World => createWorld();
+/** Start over forgets the pets and puzzles but keeps the outfit. */
+export const resetWorld = (world: World): World => createWorld(world.look);
 
 export const hasPet = (world: World, id: PetId) => world.found.includes(id);
 export const allFound = (world: World) => world.found.length >= PET_COUNT;

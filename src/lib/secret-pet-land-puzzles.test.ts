@@ -156,11 +156,12 @@ describe('clues and reset', () => {
     expect(clueFor(play(ROUTES.kitten).world, 'home')).toMatch(/No more secrets/);
   });
 
-  it('start over clears pets, puzzles, hand and look', () => {
-    const { world } = play([...ROUTES.kitten, 'sun', 'basket']);
+  it('start over clears pets, puzzles and hand but keeps the look', () => {
+    const look = { ...createWorld().look, hat: 3 };
+    const { world } = play([...ROUTES.kitten, 'sun', 'basket'], createWorld(look));
     expect(world.found).toHaveLength(1);
-    const fresh = resetWorld();
-    expect(fresh).toEqual(createWorld());
+    const fresh = resetWorld(world);
+    expect(fresh).toEqual(createWorld(look));
     expect(fresh.found).toEqual([]);
     expect(fresh.puzzles.night).toBe(false);
   });

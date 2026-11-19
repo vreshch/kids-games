@@ -9,7 +9,7 @@ function Tree({ world, onTap }: SceneProps) {
   const owl = hasPet(world, 'owl');
   return (
     <div className="pointer-events-none absolute top-[10%] left-[8%] h-[66%] w-[44%]">
-      <div className="absolute inset-[0_0_42%_0] rounded-full bg-[#3c9a4a] shadow-[inset_-12px_-12px_0_#2f7f3c]" />
+      <div className="absolute inset-[0_0_42%_0] rounded-[50%] bg-[#3c9a4a] shadow-[inset_-12px_-12px_0_#2f7f3c]" />
       <div className="absolute top-[48%] bottom-0 left-[34%] w-[32%] rounded-lg bg-[#8a5a2b]">
         <button
           type="button"
@@ -65,7 +65,7 @@ export function ForestScene(props: SceneProps) {
         y={88}
         label="Log"
         onTap={() => onTap('log')}
-        className="h-[9%] w-[38%] rounded-[30px] border-[3px] border-[#6f4a22] bg-[#9b6a35] after:absolute after:top-[12%] after:right-[3%] after:bottom-[12%] after:w-[16%] after:rounded-full after:bg-[#3a2410]"
+        className="h-[9%] w-[38%] rounded-[30px] border-[3px] border-[#6f4a22] bg-[#9b6a35] after:absolute after:top-[12%] after:right-[3%] after:bottom-[12%] after:w-[16%] after:rounded-[50%] after:bg-[#3a2410]"
       />
       {hasPet(world, 'hedgehog') && <Deco x={68} y={88} emoji="🦔" size="pet" />}
     </div>

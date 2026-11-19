@@ -9,14 +9,14 @@ export type SceneProps = { world: World; onTap: (target: Target, pad?: PadSize) 
 const SOIL = ['', '🌱', '🥬'];
 
 function Rock({ world, onTap }: SceneProps) {
-  const taps = world.puzzles.rockTaps.length;
+  const taps = world.puzzles.rockTaps;
   return (
     <Spot x={28} y={84} label="Rock" onTap={() => onTap('rock')} className="h-[12%] w-[26%]">
       <span
-        key={taps}
+        key={taps.at(-1) ?? 0}
         className={cn(
           'h-full w-full rounded-[48%_52%_40%_45%/60%_62%_38%_40%] border-[3px] border-[#6d7282] bg-[radial-gradient(circle_at_35%_30%,#c9ccd6,#8a8f9f)]',
-          taps > 0 && 'animate-spl-wobble'
+          taps.length > 0 && 'animate-spl-wobble'
         )}
       />
     </Spot>
