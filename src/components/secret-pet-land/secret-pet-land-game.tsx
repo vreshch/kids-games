@@ -3,7 +3,8 @@
 import { useState, useSyncExternalStore } from 'react';
 
 import { beep } from '@/lib/secret-pet-land-audio';
-import type { PlaceId } from '@/lib/secret-pet-land-data';
+import { ITEM_EMOJI, type PlaceId } from '@/lib/secret-pet-land-data';
+import { dropDragged, type DragSource } from '@/lib/secret-pet-land-drag';
 import { applyKid, randomLook, setPart, type TabId } from '@/lib/secret-pet-land-look';
 import { tap, type Target } from '@/lib/secret-pet-land-puzzles';
 import { loadWorld } from '@/lib/secret-pet-land-save';
@@ -14,6 +15,8 @@ import { ForestScene } from './forest';
 import { HomeScene } from './home';
 import { Bubble, CardButton, Hand, PlaceNav, TopBar } from './hud';
 import { OverlayView } from './overlays';
+import { Ghost } from './scene-parts';
+import { useDrag } from './use-drag';
 import { usePetLand } from './use-pet-land';
 
 const SCENES = { farm: FarmScene, pond: PondScene, forest: ForestScene };
@@ -28,9 +31,12 @@ function Land({ initial }: { initial: World }) {
   const [tab, setTab] = useState<TabId>('kid');
 
   const onTap = (target: Target, pad?: PadSize) =>
-    apply(tap(world, target, { now: Date.now(), pad }));
+    apply(tap(game.read(), target, { now: Date.now(), pad }));
+  const onDrop = (source: DragSource, target: Target | null) =>
+    apply(dropDragged(game.read(), source, target, Date.now()));
+  const { api: drag, stage } = useDrag(world, onDrop);
   const restyle = (look: World['look'], freq: number) => {
-    commit({ ...world, look });
+    commit({ ...game.read(), look });
     beep(freq, 0.08);
   };
   const onTab = (next: TabId) => {
@@ -54,9 +60,9 @@ function Land({ initial }: { initial: World }) {
   return (
     <div className={FRAME}>
       <TopBar count={world.found.length} total={PET_COUNT} />
-      <div className="relative min-h-0 flex-1 overflow-hidden">
+      <div className="relative min-h-0 flex-1 overflow-hidden" {...stage}>
         {Scene ? (
-          <Scene world={world} onTap={onTap} />
+          <Scene world={world} onTap={onTap} drag={drag} />
         ) : (
           <HomeScene
             world={world}
@@ -67,7 +73,8 @@ function Land({ initial }: { initial: World }) {
             onKid={(kid) => restyle(applyKid(world.look, kid), 600)}
           />
         )}
-        {world.hand && <Hand item={world.hand} onDrop={game.drop} />}
+        {world.hand && <Hand item={world.hand} onDrop={game.drop} onDrag={drag.start('hand')} />}
+        {drag.ghost && <Ghost ghost={{ ...drag.ghost, emoji: ITEM_EMOJI[drag.ghost.item] }} />}
         <CardButton onOpen={openCard} />
         <Bubble {...game.bubble} />
         {overlay && (

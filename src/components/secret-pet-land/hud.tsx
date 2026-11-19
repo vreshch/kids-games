@@ -1,3 +1,5 @@
+import type { PointerEvent } from 'react';
+
 import { ITEM_EMOJI, PLACES, type Item, type PlaceId } from '@/lib/secret-pet-land-data';
 
 import { cn } from './cn';
@@ -15,13 +17,16 @@ export function TopBar({ count, total }: { count: number; total: number }) {
   );
 }
 
-export function Hand({ item, onDrop }: { item: Item; onDrop: () => void }) {
+type HandProps = { item: Item; onDrop: () => void; onDrag: (e: PointerEvent) => void };
+
+export function Hand({ item, onDrop, onDrag }: HandProps) {
   return (
     <button
       type="button"
       aria-label="Put it down"
       onClick={onDrop}
-      className="absolute top-2 left-2 z-10 flex items-center gap-1.5 rounded-2xl border-[3px] border-[#ff7eb6] bg-white px-2.5 py-0.5 text-[26px] font-bold text-[#3a2460]"
+      onPointerDown={onDrag}
+      className="absolute top-2 left-2 z-10 flex touch-none items-center gap-1.5 rounded-2xl border-[3px] border-[#ff7eb6] bg-white px-2.5 py-0.5 text-[26px] font-bold text-[#3a2460]"
     >
       {ITEM_EMOJI[item]}
       <small className="text-[13px]">in hand</small>

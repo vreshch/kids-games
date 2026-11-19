@@ -90,3 +90,25 @@ test('secret pet land: knock on the present three times to find the kitten', asy
   await expect(page.getByText('You found the Kitten!')).toBeVisible();
   await expect(page.getByText('🐾 1/7')).toBeVisible();
 });
+
+test('secret pet land: drag seeds and water onto the soil to grow a cabbage', async ({ page }) => {
+  await page.goto('/secret-pet-land');
+  const dragTo = async (from: string, to: string) => {
+    const a = (await page.getByRole('button', { name: from, exact: true }).boundingBox())!;
+    const b = (await page.getByRole('button', { name: to, exact: true }).boundingBox())!;
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+    await page.mouse.up();
+  };
+  const soil = page.getByRole('button', { name: 'Soil' });
+  // The world mounts only after hydration, so retry until the farm nav answers.
+  await expect(async () => {
+    await page.getByRole('button', { name: /Farm/ }).click();
+    await expect(soil).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await dragTo('Seeds', 'Soil');
+  await expect(soil).toHaveText('🌱');
+  await dragTo('Water', 'Soil');
+  await expect(soil).toHaveText('🥬');
+});

@@ -1,7 +1,7 @@
 import { hasPet, mushroomVisible } from '@/lib/secret-pet-land-world';
 
 import { cn } from './cn';
-import type { SceneProps } from './farm-pond';
+import { dropZone, type SceneProps } from './farm-pond';
 import { Deco, Spot } from './scene-parts';
 
 function Tree({ world, onTap }: SceneProps) {
@@ -25,7 +25,7 @@ function Tree({ world, onTap }: SceneProps) {
 }
 
 export function ForestScene(props: SceneProps) {
-  const { world, onTap } = props;
+  const { world, onTap, drag } = props;
   const night = world.puzzles.night;
   return (
     <div
@@ -56,7 +56,13 @@ export function ForestScene(props: SceneProps) {
         className="h-[13%] w-[30%] rounded-[50%] bg-[#2f8f3f] shadow-[inset_-8px_-8px_0_#24742f]"
       />
       {mushroomVisible(world) && (
-        <Spot x={90} y={76} label="Mushroom" onTap={() => onTap('mushroom')}>
+        <Spot
+          x={90}
+          y={76}
+          label="Mushroom"
+          onTap={() => onTap('mushroom')}
+          onDrag={drag.start('mushroom')}
+        >
           🍄
         </Spot>
       )}
@@ -65,6 +71,7 @@ export function ForestScene(props: SceneProps) {
         y={88}
         label="Log"
         onTap={() => onTap('log')}
+        {...dropZone(drag, 'log')}
         className="h-[9%] w-[38%] rounded-[30px] border-[3px] border-[#6f4a22] bg-[#9b6a35] after:absolute after:top-[12%] after:right-[3%] after:bottom-[12%] after:w-[16%] after:rounded-[50%] after:bg-[#3a2410]"
       />
       {hasPet(world, 'hedgehog') && <Deco x={68} y={88} emoji="🦔" size="pet" />}

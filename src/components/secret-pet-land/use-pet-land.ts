@@ -32,6 +32,9 @@ function useBubble() {
 /** All game state plus the side effects (sound, save, analytics) of applying an outcome. */
 export function usePetLand(initial: World) {
   const [world, setWorld] = useState(initial);
+  // taps can land faster than React re-renders, so handlers read the latest world from here
+  const latest = useRef(initial);
+  const read = () => latest.current;
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [resetArmed, setResetArmed] = useState(false);
   const started = useRef(false);
@@ -47,6 +50,7 @@ export function usePetLand(initial: World) {
   }, []);
 
   const commit = (next: World) => {
+    latest.current = next;
     setWorld(next);
     saveWorld(next);
     if (!started.current) trackEvent('game_start', GAME);
@@ -74,13 +78,14 @@ export function usePetLand(initial: World) {
 
   const reset = () => {
     if (!resetArmed) return setResetArmed(true);
-    commit(resetWorld(world));
+    commit(resetWorld(read()));
     closeOverlay();
   };
 
-  const drop = () => apply(dropItem(world));
+  const drop = () => apply(dropItem(read()));
   return {
     world,
+    read,
     overlay,
     setOverlay,
     resetArmed,
