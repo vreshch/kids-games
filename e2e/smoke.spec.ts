@@ -76,3 +76,17 @@ test('wiggle snakes starts and the super button fires', async ({ page }) => {
   await page.getByRole('button', { name: 'Super power' }).click();
   await expect(page.getByText('SUPER!')).toBeHidden();
 });
+
+test('secret pet land: knock on the present three times to find the kitten', async ({ page }) => {
+  await page.goto('/secret-pet-land');
+  const present = page.getByRole('button', { name: 'Present' });
+  // The world mounts only after hydration, so retry the first knock until it registers.
+  await expect(async () => {
+    await present.click();
+    await expect(page.getByText('Knock...')).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await present.click();
+  await present.click();
+  await expect(page.getByText('You found the Kitten!')).toBeVisible();
+  await expect(page.getByText('🐾 1/7')).toBeVisible();
+});

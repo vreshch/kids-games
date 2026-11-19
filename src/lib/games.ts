@@ -6,6 +6,7 @@ import {
   FrankieIcon,
   MunchIcon,
   ParrotIcon,
+  PetLandIcon,
   SmileIcon,
   SprankiIcon,
   WiggleIcon,
@@ -69,6 +70,13 @@ export const GAMES: Game[] = [
     tagline: 'Roll the die, count your steps, munch the berries, dodge the grumpy clouds.',
     accent: '#34d399',
     Icon: MunchIcon,
+  },
+  {
+    slug: 'secret-pet-land',
+    title: 'Secret Pet Land',
+    tagline: 'Dress up your own kid, explore the farm, pond and forest, find 7 secret pets.',
+    accent: '#ff7eb6',
+    Icon: PetLandIcon,
   },
 ];
 

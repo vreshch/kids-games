@@ -137,3 +137,24 @@ export function MunchIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function PetLandIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <ellipse cx={17} cy={11} rx={4.5} ry={10} fill="#fff1f7" />
+      <ellipse cx={31} cy={11} rx={4.5} ry={10} fill="#fff1f7" />
+      <ellipse cx={17} cy={12} rx={2} ry={6.5} fill="#ff7eb6" />
+      <ellipse cx={31} cy={12} rx={2} ry={6.5} fill="#ff7eb6" />
+      <circle cx={24} cy={29} r={14} fill="#fff1f7" />
+      <circle cx={19} cy={27} r={2.2} fill="#2d2d3a" />
+      <circle cx={29} cy={27} r={2.2} fill="#2d2d3a" />
+      <circle cx={24} cy={32} r={2} fill="#ff7eb6" />
+      <circle cx={15} cy={33} r={2.5} fill="#ff7eb6" opacity={0.45} />
+      <circle cx={33} cy={33} r={2.5} fill="#ff7eb6" opacity={0.45} />
+      <path
+        d="M 40 6 l 1.5 3.5 l 3.5 1.5 l -3.5 1.5 l -1.5 3.5 l -1.5 -3.5 l -3.5 -1.5 l 3.5 -1.5 Z"
+        fill="#fde047"
+      />
+    </svg>
+  );
+}

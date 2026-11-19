@@ -28,6 +28,8 @@ const BLURBS: Record<string, string> = {
   frankie: 'Feed the singers fruit and hear what silly song comes out.',
   'crystal-rooms': 'Walk the glowing caves, find the letter keys, spell the secret word.',
   'wiggle-snakes': 'Eat glowing dots, grow huge, then press SUPER and gobble every snake!',
+  'secret-pet-land':
+    'Dress up, then explore the farm, pond and forest. Seven secret pets are hiding!',
 };
 
 export function blurbFor(game: Game): string {
