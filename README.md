@@ -65,6 +65,10 @@ The stack has two services from the one image: `web` (the site) and `relay` (`re
 `wss://games.vreshch.com/relay/<room>`. Rooms live in memory only and end after one day, so a
 deploy ends the games in progress.
 
+Tanky Town uses it for "Play together": the first player's browser runs the game and sends it
+to the friend about 30 times a second; the friend sends back only the pad and fire input. To try
+it locally, run `RELAY_ORIGINS='*' npm run relay` beside `npm run dev`.
+
 Repo secrets: `SERVER_HOST`, `SSH_PRIVATE_KEY` (environment `production`).
 
 ## License
