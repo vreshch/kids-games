@@ -19,6 +19,9 @@ ENV BUILD_TIME=${BUILD_TIME}
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+# the relay service runs from this same image; standalone output does not trace it
+COPY --from=builder /app/relay/relay.ts ./relay/relay.ts
+COPY --from=builder /app/node_modules/ws ./node_modules/ws
 
 EXPOSE 3000
 CMD ["node", "server.js"]

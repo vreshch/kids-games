@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "relay": "node --experimental-strip-types relay/relay.ts",
     "lint": "eslint",
     "type-check": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
@@ -23,7 +24,8 @@
     "qrcode": "^1.5.4",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "three": "^0.187.0"
+    "three": "^0.187.0",
+    "ws": "^8.23.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
@@ -33,6 +35,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.187.0",
+    "@types/ws": "^8.18.2",
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",

@@ -57,8 +57,13 @@ Drop a component in `src/components/`, a page in `src/app/<slug>/`, and an entry
 ### Deploy
 
 Push to `master`. CI builds `ghcr.io/vreshch/kids-games`, deploys the `kids-games` Swarm stack
-behind Traefik, then fails the run unless `https://games.vreshch.com/health` reports the
-deployed commit. Never deploy by hand.
+behind Traefik, then fails the run unless `https://games.vreshch.com/health` and
+`/relay/health` report the deployed commit. Never deploy by hand.
+
+The stack has two services from the one image: `web` (the site) and `relay` (`relay/relay.ts`,
+`npm run relay` locally). The relay passes messages between the two players of a room at
+`wss://games.vreshch.com/relay/<room>`. Rooms live in memory only and end after one day, so a
+deploy ends the games in progress.
 
 Repo secrets: `SERVER_HOST`, `SSH_PRIVATE_KEY` (environment `production`).
 
