@@ -16,6 +16,8 @@ export type Tank = {
   id: number;
   owner: Owner;
   kind: TankKind;
+  /** Which player drives it: 0 or 1; -1 for enemies. */
+  seat: number;
   x: number;
   y: number;
   dir: Dir;
@@ -55,7 +57,9 @@ export type World = {
   pickup: Pickup | null;
   queue: EnemyKind[];
   spawnIn: number;
-  respawnIn: number;
+  /** One countdown per player seat. */
+  respawnIn: number[];
+  players: number;
   /** Seconds of "level clear" party left before the next map loads. */
   clearIn: number;
   lives: number;
@@ -87,18 +91,20 @@ export const tankPos = (tank: Tank): Point => ({
   y: tank.y - DY[tank.dir] * tank.off,
 });
 
-export const heroOf = (world: World) => world.tanks.find((tank) => tank.owner === 'player');
+export const playerTank = (world: World, seat = 0) =>
+  world.tanks.find((tank) => tank.seat === seat);
 export const enemiesOf = (world: World) => world.tanks.filter((tank) => tank.owner === 'enemy');
 
 export function emit(world: World, type: TankEventType, at: Point, owner?: Owner) {
   world.events.push({ type, x: at.x, y: at.y, owner });
 }
 
-export function addTank(world: World, kind: TankKind, at: Point, dir: Dir): Tank {
+export function addTank(world: World, kind: TankKind, at: Point, dir: Dir, seat = -1): Tank {
   const tank: Tank = {
     id: world.nextId++,
     owner: kind === 'hero' ? 'player' : 'enemy',
     kind,
+    seat,
     x: at.x,
     y: at.y,
     dir,

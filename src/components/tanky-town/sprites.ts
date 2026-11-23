@@ -45,9 +45,11 @@ function face(ctx: Ctx, s: number, grumpy: boolean) {
   }
 }
 
+const FRIEND = { hull: '#14b8a6', top: '#99f6e4', scale: 1 };
+
 /** Drawn facing right, then turned; (x, y) is the tank centre in pixels. */
 export function drawTank(ctx: Ctx, tank: Tank, x: number, y: number, s: number, now: number) {
-  const look = LOOKS[tank.kind];
+  const look = tank.seat === 1 ? FRIEND : LOOKS[tank.kind];
   const size = s * look.scale;
   ctx.save();
   ctx.translate(x, y);

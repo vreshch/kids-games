@@ -1,9 +1,11 @@
 import { fire, stepBullets, stepPickup } from './tanky-town-bullets';
 import { LEVEL_COUNT, parseLevel } from './tanky-town-level';
-import { emit, enemiesOf, heroOf, type Input, type World } from './tanky-town-state';
-import { drive, driveEnemy, placeHero, respawnHero, spawnEnemies } from './tanky-town-tanks';
+import { emit, enemiesOf, type Input, type World } from './tanky-town-state';
+import { drive, driveEnemy, placePlayer, respawnPlayers, spawnEnemies } from './tanky-town-tanks';
 
 const START_LIVES = 3;
+const LIVES_PER_FRIEND = 2;
+const IDLE: Input = { dir: null, fire: false };
 const MAX_DT = 0.05;
 const CLEAR_BONUS = 500;
 const CLEAR_PAUSE = 2.4;
@@ -20,7 +22,7 @@ function levelState(index: number) {
     pickup: null,
     queue: [...level.roster],
     spawnIn: 1,
-    respawnIn: 0,
+    respawnIn: [0, 0],
     clearIn: 0,
     kills: 0,
     phase: 'play' as const,
@@ -28,17 +30,22 @@ function levelState(index: number) {
 }
 
 /** The whole game lives in this one object; nothing else holds game state. */
-export function createWorld(rng: () => number = Math.random, levelIndex = 0): World {
-  const run = { lives: START_LIVES, score: 0, events: [], rng, nextId: 1 };
+export function createWorld(rng: () => number = Math.random, levelIndex = 0, players = 1): World {
+  const lives = START_LIVES + (players - 1) * LIVES_PER_FRIEND;
+  const run = { players, lives, score: 0, events: [], rng, nextId: 1 };
   const world: World = { ...run, ...levelState(levelIndex) };
-  placeHero(world);
+  placePlayers(world);
   return world;
+}
+
+function placePlayers(world: World) {
+  for (let seat = 0; seat < world.players; seat++) placePlayer(world, seat);
 }
 
 /** Swaps in a fresh map and roster; score and lives carry over. */
 export function loadLevel(world: World, index: number) {
   Object.assign(world, levelState(index));
-  placeHero(world);
+  placePlayers(world);
 }
 
 /** Enemies still to beat on this level: on the field plus waiting at the gates. */
@@ -60,9 +67,10 @@ function stepTimers(world: World, dt: number) {
   }
 }
 
-function stepTanks(world: World, dt: number, input: Input) {
+function stepTanks(world: World, dt: number, inputs: Input[]) {
   for (const tank of [...world.tanks]) {
     if (tank.owner === 'player') {
+      const input = inputs[tank.seat] ?? IDLE;
       drive(world, tank, dt, () => input.dir);
       if (input.fire) fire(world, tank);
     } else {
@@ -77,19 +85,19 @@ function stepClear(world: World, dt: number) {
   world.clearIn -= dt;
   if (world.clearIn > 0) return;
   loadLevel(world, world.levelIndex + 1);
-  emit(world, 'level', world.level.player);
+  emit(world, 'level', world.level.homes[0]);
 }
 
 /** One frame of the game; the only way the world moves on. Frozen once won or lost. */
-export function step(world: World, dt: number, input: Input) {
+export function step(world: World, dt: number, inputs: Input[]) {
   const tick = Math.min(MAX_DT, dt);
   if (world.phase === 'clear') return stepClear(world, tick);
   if (world.phase !== 'play') return;
   stepTimers(world, tick);
   spawnEnemies(world, tick);
-  respawnHero(world, tick);
-  stepTanks(world, tick, input);
+  respawnPlayers(world, tick);
+  stepTanks(world, tick, inputs);
   stepBullets(world, tick);
-  stepPickup(world, tick, heroOf(world));
+  stepPickup(world, tick);
   checkClear(world);
 }

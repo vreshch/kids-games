@@ -31,11 +31,39 @@ test('tanky town starts a game with touch controls', async ({ page }) => {
   await page.goto('/tanky-town');
   // Play only answers once React has hydrated, so retry the tap until the level shows.
   await expect(async () => {
-    await page.getByRole('button', { name: 'Play' }).click({ timeout: 1000 });
+    await page.getByRole('button', { name: 'Play', exact: true }).click({ timeout: 1000 });
     await expect(page.getByText('Brick Garden', { exact: false })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 15_000 });
   await expect(page.getByRole('button', { name: 'Fire' })).toBeVisible();
   await expect(page.getByRole('group', { name: 'Drive pad' })).toBeVisible();
+});
+
+test('tanky town: a friend joins by link and both play the same game', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/tanky-town');
+  // The button only answers once React has hydrated, so retry until the link shows.
+  await expect(async () => {
+    await page.getByRole('button', { name: /Play together/ }).click({ timeout: 1000 });
+    await expect(page.getByText('Waiting for your friend')).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  const link = await page.getByLabel('Game link').inputValue();
+  expect(link).toMatch(/\/tanky-town\?room=[a-z0-9]{6}$/);
+
+  const friend = await context.newPage();
+  await friend.goto(link);
+  await expect(async () => {
+    await friend.getByRole('button', { name: /Join your friend/ }).click({ timeout: 1000 });
+    await expect(friend.getByText('Brick Garden', { exact: false })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 15_000 });
+  await expect(page.getByText('Brick Garden', { exact: false })).toBeVisible();
+  await expect(page.getByText('you 🟡')).toBeVisible();
+  await expect(friend.getByText('you 🟢')).toBeVisible();
+  await expect(friend.getByLabel('5 lives')).toBeVisible();
+
+  await friend.close();
+  await expect(page.getByText('Your friend left', { exact: false })).toBeVisible();
 });
 
 test('frankie feeds a singer a fruit', async ({ page }) => {

@@ -5,20 +5,20 @@ import { ALL_DIRS, DX, DY, LEVEL_COUNT, LEVEL_DEFS, parseLevel } from './tanky-t
 import {
   addTank,
   enemiesOf,
-  heroOf,
+  playerTank,
   setTile,
   tankPos,
   tileAt,
   type Input,
   type World,
 } from './tanky-town-state';
-import { canEnter, chooseDir, drive, respawnHero, spawnEnemies } from './tanky-town-tanks';
+import { canEnter, chooseDir, drive, respawnPlayers, spawnEnemies } from './tanky-town-tanks';
 import { createWorld, enemiesLeft, step } from './tanky-town-world';
 
 const fixed = (value: number) => () => value;
 const IDLE: Input = { dir: null, fire: false };
 const run = (world: World, seconds: number, input: Input = IDLE) => {
-  for (let t = 0; t < seconds; t += 0.02) step(world, 0.02, input);
+  for (let t = 0; t < seconds; t += 0.02) step(world, 0.02, [input]);
 };
 /** A calm world: the hero at home, one enemy that never leaves its gate. */
 const quiet = (level = 0) => {
@@ -39,7 +39,7 @@ describe('levels', () => {
       expect(level.rows).toBe(13);
       expect(level.tiles.filter((tile) => tile === 'cake')).toHaveLength(1);
       expect(level.spawns).toHaveLength(3);
-      expect(level.player).toBeDefined();
+      expect(level.homes).toHaveLength(2);
       expect(level.roster.every(Boolean)).toBe(true);
     }
   });
@@ -60,7 +60,7 @@ describe('levels', () => {
           todo.push(next);
         }
       }
-      for (const start of [...world.level.spawns, world.level.player]) {
+      for (const start of [...world.level.spawns, world.level.homes[0]]) {
         expect(seen.has(start.y * cols + start.x)).toBe(true);
       }
     }
@@ -76,7 +76,7 @@ describe('levels', () => {
 describe('driving', () => {
   it('hops one tile at a time and stops at walls', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     run(world, 0.1, { dir: 2, fire: false });
     expect(hero.x).toBe(2);
     expect(tankPos(hero).x).toBeGreaterThan(2);
@@ -87,7 +87,7 @@ describe('driving', () => {
 
   it('turns in place when a brick is in the way', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     run(world, 0.5, { dir: 0, fire: false });
     expect(hero.dir).toBe(0);
     expect(hero.x).toBe(3);
@@ -95,7 +95,7 @@ describe('driving', () => {
 
   it('keeps tanks out of each other, water and steel, but lets them hide in bushes', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     const other = addTank(world, 'basic', { x: 3, y: 11 }, 1);
     expect(canEnter(world, hero, 3, 11)).toBe(false);
     expect(canEnter(world, other, 3, 10)).toBe(false);
@@ -110,7 +110,7 @@ describe('driving', () => {
 
   it('holds the tile a tank is leaving until the hop is done', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     drive(world, hero, 0.05, () => 3);
     const other = addTank(world, 'basic', { x: 2, y: 12 }, 0);
     expect(hero.y).toBe(11);
@@ -135,7 +135,7 @@ describe('shooting', () => {
     setTile(world, 4, 12, 'empty');
     run(world, 1, { dir: 0, fire: true });
     expect(world.phase).toBe('play');
-    expect(heroOf(world)!.x).toBe(4);
+    expect(playerTank(world)!.x).toBe(4);
   });
 
   it('bounces off steel and leaves the field at the edge', () => {
@@ -151,7 +151,7 @@ describe('shooting', () => {
 
   it('destroys an enemy, scores, and needs three hits for a tough one', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     hero.dir = 3;
     addTank(world, 'basic', { x: 3, y: 9 }, 1).reload = 99;
     fire(world, hero);
@@ -215,32 +215,32 @@ describe('enemies', () => {
     stepBullets(world, 0.05);
     expect(world.phase).toBe('over');
     expect(types(world)).toEqual(expect.arrayContaining(['cake', 'over']));
-    step(world, 0.02, IDLE);
+    step(world, 0.02, [IDLE]);
   });
 });
 
 describe('lives', () => {
   it('shields a fresh hero, then a hit costs a life and the hero comes back', () => {
     const world = quiet();
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     damage(world, hero);
     expect(world.lives).toBe(3);
     hero.shield = 0;
     damage(world, hero);
     expect(world.lives).toBe(2);
-    expect(heroOf(world)).toBeUndefined();
-    addTank(world, 'basic', world.level.player, 1);
-    respawnHero(world, 5);
-    expect(heroOf(world)).toBeUndefined();
+    expect(playerTank(world)).toBeUndefined();
+    addTank(world, 'basic', world.level.homes[0], 1);
+    respawnPlayers(world, 5);
+    expect(playerTank(world)).toBeUndefined();
     world.tanks = [];
     run(world, 1.5);
-    expect(heroOf(world)?.shield).toBeGreaterThan(0);
+    expect(playerTank(world)?.shield).toBeGreaterThan(0);
   });
 
   it('is game over when the last life is gone', () => {
     const world = quiet();
     world.lives = 1;
-    const hero = heroOf(world)!;
+    const hero = playerTank(world)!;
     hero.shield = 0;
     damage(world, hero);
     expect(world.phase).toBe('over');
@@ -251,7 +251,7 @@ describe('lives', () => {
     for (let i = 0; i < 3; i++) damage(world, addTank(world, 'basic', { x: 0, y: 4 }, 1));
     expect(world.pickup).not.toBeNull();
     world.pickup = { x: 3, y: 12, ttl: 5 };
-    stepPickup(world, 0.1, heroOf(world));
+    stepPickup(world, 0.1);
     expect(world.lives).toBe(4);
     expect(world.pickup).toBeNull();
     world.pickup = { x: 0, y: 0, ttl: 0.05 };
@@ -265,7 +265,7 @@ describe('progress', () => {
   it('clears a level when every enemy is beaten, then loads the next map', () => {
     const world = beaten();
     world.score = 100;
-    step(world, 0.02, IDLE);
+    step(world, 0.02, [IDLE]);
     expect(world.phase).toBe('clear');
     expect(world.score).toBe(600);
     run(world, 1);
@@ -274,13 +274,13 @@ describe('progress', () => {
     expect(world.levelIndex).toBe(1);
     expect(world.phase).toBe('play');
     expect(world.score).toBe(600);
-    expect(heroOf(world)).toBeDefined();
+    expect(playerTank(world)).toBeDefined();
     expect(types(world)).toContain('level');
   });
 
   it('is won after the fifth level and then stays frozen', () => {
     const world = beaten(LEVEL_COUNT - 1);
-    step(world, 0.02, IDLE);
+    step(world, 0.02, [IDLE]);
     expect(world.phase).toBe('won');
     expect(types(world)).toContain('won');
     run(world, 5);
@@ -292,7 +292,7 @@ describe('progress', () => {
     for (let t = 0; t < 60 && world.phase !== 'won'; t += 0.02) {
       world.queue = [];
       world.tanks = world.tanks.filter((tank) => tank.owner === 'player');
-      step(world, 0.02, IDLE);
+      step(world, 0.02, [IDLE]);
     }
     expect(world.phase).toBe('won');
     expect(world.score).toBe(2500);
