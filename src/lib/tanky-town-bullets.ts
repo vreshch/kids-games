@@ -12,7 +12,7 @@ import {
 } from './tanky-town-state';
 import { startRespawn } from './tanky-town-tanks';
 
-const BULLET_SPEED = { player: 9, enemy: 5 };
+export const BULLET_SPEED = { player: 9, enemy: 5 };
 const HIT_RADIUS = 0.45;
 const MAX_LIVES = 5;
 const HEART_AT_KILL = 3;
@@ -40,7 +40,7 @@ function destroy(world: World, tank: Tank) {
   emit(world, 'boom', tankPos(tank), tank.owner);
   if (tank.kind === 'hero') {
     world.lives -= 1;
-    if (world.lives > 0) return startRespawn(world);
+    if (world.lives > 0) return startRespawn(world, tank.seat);
     world.phase = 'over';
     return emit(world, 'over', tankPos(tank));
   }
@@ -114,11 +114,12 @@ export function stepBullets(world: World, dt: number) {
 }
 
 /** The heart fades after a while; the hero grabs it by driving over it. */
-export function stepPickup(world: World, dt: number, hero?: Tank) {
+export function stepPickup(world: World, dt: number) {
   const pickup = world.pickup;
   if (!pickup) return;
   pickup.ttl -= dt;
-  if (hero && hero.x === pickup.x && hero.y === pickup.y) {
+  const taker = world.tanks.find((t) => t.seat >= 0 && t.x === pickup.x && t.y === pickup.y);
+  if (taker) {
     world.lives = Math.min(MAX_LIVES, world.lives + 1);
     emit(world, 'heart', pickup);
     world.pickup = null;

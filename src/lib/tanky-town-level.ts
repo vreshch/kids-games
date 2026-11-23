@@ -13,7 +13,8 @@ export type Level = {
   cols: number;
   rows: number;
   tiles: Tile[];
-  player: Point;
+  /** Where each player seat starts and comes back; seat 1 mirrors seat 0. */
+  homes: Point[];
   spawns: Point[];
   cake: Point;
   roster: EnemyKind[];
@@ -142,7 +143,7 @@ export function parseLevel(index: number): Level {
     cols,
     rows: def.map.length,
     tiles: cells.map((c) => TILES[c] ?? 'empty'),
-    player: find('P')[0],
+    homes: find('P').flatMap((p) => [p, { x: cols - 1 - p.x, y: p.y }]),
     spawns: find('E'),
     cake: find('C')[0],
     roster: def.roster.split('').map((c) => KINDS[c]),

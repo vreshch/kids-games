@@ -3,7 +3,7 @@ import {
   addTank,
   emit,
   enemiesOf,
-  heroOf,
+  playerTank,
   SPEED,
   tileAt,
   type Tank,
@@ -103,20 +103,24 @@ export function spawnEnemies(world: World, dt: number) {
   world.spawnIn = SPAWN_EVERY;
 }
 
-export function placeHero(world: World): Tank {
-  return addTank(world, 'hero', world.level.player, 3);
+export function placePlayer(world: World, seat: number): Tank {
+  return addTank(world, 'hero', world.level.homes[seat], 3, seat);
 }
 
 /** Brings the hero back at home once the tile is free. */
-export function respawnHero(world: World, dt: number) {
-  if (heroOf(world) || world.lives <= 0) return;
-  world.respawnIn -= dt;
-  const home: Point = world.level.player;
-  if (world.respawnIn > 0 || !tileFree(world, home.x, home.y)) return;
-  placeHero(world);
+function respawnPlayer(world: World, seat: number, dt: number) {
+  if (playerTank(world, seat) || world.lives <= 0) return;
+  world.respawnIn[seat] -= dt;
+  const home: Point = world.level.homes[seat];
+  if (world.respawnIn[seat] > 0 || !tileFree(world, home.x, home.y)) return;
+  placePlayer(world, seat);
   emit(world, 'spawn', home, 'player');
 }
 
-export const startRespawn = (world: World) => {
-  world.respawnIn = RESPAWN_AFTER;
+export function respawnPlayers(world: World, dt: number) {
+  for (let seat = 0; seat < world.players; seat++) respawnPlayer(world, seat, dt);
+}
+
+export const startRespawn = (world: World, seat: number) => {
+  world.respawnIn[seat] = RESPAWN_AFTER;
 };

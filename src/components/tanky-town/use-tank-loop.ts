@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 
-import type { Input, TankEvent, World } from '@/lib/tanky-town-state';
-import { createWorld, step } from '@/lib/tanky-town-world';
+import type { TankEvent, World } from '@/lib/tanky-town-state';
+import { createWorld } from '@/lib/tanky-town-world';
 
 import {
   confetti,
@@ -16,8 +16,8 @@ import {
 import { drawScene, fitBoard } from './render';
 
 type Options = {
-  inputRef: RefObject<Input>;
-  liveRef: RefObject<boolean>;
+  /** Moves the world on by one frame: a local step, a host step, or a guest snapshot. */
+  advance: (world: World, dt: number) => void;
   onEvent: (event: TankEvent, world: World) => void;
 };
 
@@ -42,7 +42,7 @@ function celebrate(fx: Effects, event: TankEvent, world: World) {
   }
 }
 
-/** Owns the world, steps it every frame while the game is live, and draws it. */
+/** Owns the world, moves it on every frame, plays its events and draws it. */
 export function useTankLoop(canvasRef: RefObject<HTMLCanvasElement | null>, options: Options) {
   const worldRef = useRef<World>(null);
   if (worldRef.current === null) worldRef.current = createWorld();
@@ -74,10 +74,10 @@ export function useTankLoop(canvasRef: RefObject<HTMLCanvasElement | null>, opti
     let raf = 0;
     const frame = (now: number) => {
       const world = worldRef.current!;
-      const { inputRef, liveRef, onEvent } = optionsRef.current;
+      const { advance, onEvent } = optionsRef.current;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      if (liveRef.current) step(world, dt, inputRef.current);
+      advance(world, dt);
       for (const event of world.events) {
         celebrate(fx, event, world);
         onEvent(event, world);
