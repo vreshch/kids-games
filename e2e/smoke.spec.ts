@@ -27,6 +27,17 @@ test('crystal rooms shows the start overlay', async ({ page }) => {
   await expect(page.getByText('spell the secret word', { exact: false })).toBeVisible();
 });
 
+test('tanky town starts a game with touch controls', async ({ page }) => {
+  await page.goto('/tanky-town');
+  // Play only answers once React has hydrated, so retry the tap until the level shows.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Play' }).click({ timeout: 1000 });
+    await expect(page.getByText('Brick Garden', { exact: false })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await expect(page.getByRole('button', { name: 'Fire' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Drive pad' })).toBeVisible();
+});
+
 test('frankie feeds a singer a fruit', async ({ page }) => {
   await page.goto('/frankie');
   // The tray only answers once React has hydrated, so retry the first pick until it sticks.
