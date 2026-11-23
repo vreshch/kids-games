@@ -9,6 +9,7 @@ import {
   PetLandIcon,
   SmileIcon,
   SprankiIcon,
+  TankIcon,
   WiggleIcon,
 } from '@/components/game-icons';
 
@@ -77,6 +78,13 @@ export const GAMES: Game[] = [
     tagline: 'Dress up your own kid, explore the farm, pond and forest, find 7 secret pets.',
     accent: '#ff7eb6',
     Icon: PetLandIcon,
+  },
+  {
+    slug: 'tanky-town',
+    title: 'Tanky Town',
+    tagline: 'Drive a little tank, guard the birthday cake, beat the grumpy tanks on 5 levels.',
+    accent: '#f59e0b',
+    Icon: TankIcon,
   },
 ];
 

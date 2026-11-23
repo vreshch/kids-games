@@ -158,3 +158,19 @@ export function PetLandIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function TankIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <rect x={5} y={10} width={38} height={9} rx={4} fill="#1f2937" />
+      <rect x={5} y={31} width={38} height={9} rx={4} fill="#1f2937" />
+      <rect x={9} y={13} width={28} height={24} rx={6} fill="#f59e0b" />
+      <rect x={24} y={22.5} width={22} height={5} rx={2} fill="#374151" />
+      <circle cx={22} cy={25} r={8} fill="#fde68a" />
+      <circle cx={24} cy={21.5} r={2.4} fill="#fffdf5" />
+      <circle cx={24} cy={28.5} r={2.4} fill="#fffdf5" />
+      <circle cx={24.8} cy={21.5} r={1.1} fill="#111827" />
+      <circle cx={24.8} cy={28.5} r={1.1} fill="#111827" />
+    </svg>
+  );
+}
