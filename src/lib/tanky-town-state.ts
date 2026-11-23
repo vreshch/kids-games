@@ -41,6 +41,7 @@ export type TankEventType =
   | 'heart'
   | 'cake'
   | 'clear'
+  | 'level'
   | 'won'
   | 'over';
 export type TankEvent = Point & { type: TankEventType; owner?: Owner };
@@ -55,6 +56,8 @@ export type World = {
   queue: EnemyKind[];
   spawnIn: number;
   respawnIn: number;
+  /** Seconds of "level clear" party left before the next map loads. */
+  clearIn: number;
   lives: number;
   score: number;
   kills: number;

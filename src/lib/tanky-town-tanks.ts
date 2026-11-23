@@ -77,7 +77,7 @@ export function chooseDir(world: World, tank: Tank): Dir {
   if (open.length === 0) return ALL_DIRS[Math.floor(world.rng() * 4)];
   if (open.includes(tank.dir) && world.rng() < 0.55) return tank.dir;
   const goal = towardCake(world, tank);
-  if (open.includes(goal) && world.rng() < 0.6) return goal;
+  if (open.includes(goal) && world.rng() < 0.3) return goal;
   return open[Math.floor(world.rng() * open.length)];
 }
 

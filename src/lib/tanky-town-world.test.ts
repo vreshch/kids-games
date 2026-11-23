@@ -13,7 +13,7 @@ import {
   type World,
 } from './tanky-town-state';
 import { canEnter, chooseDir, drive, respawnHero, spawnEnemies } from './tanky-town-tanks';
-import { createWorld, enemiesLeft, nextLevel, step } from './tanky-town-world';
+import { createWorld, enemiesLeft, step } from './tanky-town-world';
 
 const fixed = (value: number) => () => value;
 const IDLE: Input = { dir: null, fire: false };
@@ -197,7 +197,8 @@ describe('enemies', () => {
   it('pick a direction they can use, toward the cake when the dice say so', () => {
     const world = quiet();
     const tank = addTank(world, 'basic', { x: 0, y: 1 }, 3);
-    world.rng = fixed(0.56);
+    const rolls = [0.9, 0.1];
+    world.rng = () => rolls.shift() ?? 0;
     expect(chooseDir(world, tank)).toBe(1);
     world.rng = fixed(0.1);
     tank.dir = 0;
@@ -267,19 +268,33 @@ describe('progress', () => {
     step(world, 0.02, IDLE);
     expect(world.phase).toBe('clear');
     expect(world.score).toBe(600);
-    nextLevel(world);
+    run(world, 1);
+    expect(world.levelIndex).toBe(0);
+    run(world, 2);
     expect(world.levelIndex).toBe(1);
     expect(world.phase).toBe('play');
     expect(world.score).toBe(600);
     expect(heroOf(world)).toBeDefined();
-    nextLevel(world);
-    expect(world.levelIndex).toBe(1);
+    expect(types(world)).toContain('level');
   });
 
-  it('is won after the fifth level', () => {
+  it('is won after the fifth level and then stays frozen', () => {
     const world = beaten(LEVEL_COUNT - 1);
     step(world, 0.02, IDLE);
     expect(world.phase).toBe('won');
     expect(types(world)).toContain('won');
+    run(world, 5);
+    expect(world.levelIndex).toBe(LEVEL_COUNT - 1);
+  });
+
+  it('plays from level one to the win through step alone', () => {
+    const world = createWorld(fixed(0.5));
+    for (let t = 0; t < 60 && world.phase !== 'won'; t += 0.02) {
+      world.queue = [];
+      world.tanks = world.tanks.filter((tank) => tank.owner === 'player');
+      step(world, 0.02, IDLE);
+    }
+    expect(world.phase).toBe('won');
+    expect(world.score).toBe(2500);
   });
 });

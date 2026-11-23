@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* A phone held sideways: games put their controls beside the board. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 520px));
+
 /* One scheme only - the site is designed dark; light-mode phones got a broken white page. */
 :root {
   color-scheme: dark;

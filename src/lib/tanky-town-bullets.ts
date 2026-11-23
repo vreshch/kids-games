@@ -24,7 +24,7 @@ export function fire(world: World, tank: Tank) {
   const pos = tankPos(tank);
   const at = { x: pos.x + DX[tank.dir] * 0.5, y: pos.y + DY[tank.dir] * 0.5 };
   world.bullets.push({ ...at, dir: tank.dir, owner: tank.owner, tankId: tank.id });
-  tank.reload = tank.owner === 'player' ? 0.25 : 1.2 + world.rng() * 1.8;
+  tank.reload = tank.owner === 'player' ? 0.25 : 2 + world.rng() * 2.5;
   emit(world, 'shot', at, tank.owner);
 }
 

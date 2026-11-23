@@ -45,7 +45,7 @@ export function DrivePad({ onDir }: { onDir: (dir: Dir | null) => void }) {
       onPointerUp={() => set(null)}
       onPointerCancel={() => set(null)}
       onContextMenu={(e) => e.preventDefault()}
-      className="grid h-44 w-44 touch-none grid-cols-3 grid-rows-3 gap-1 rounded-full bg-neutral-800/70 p-2"
+      className="grid h-36 w-36 touch-none grid-cols-3 grid-rows-3 gap-1 rounded-full bg-neutral-800/70 p-2"
     >
       {ARROWS.map((a) => (
         <span
@@ -76,7 +76,7 @@ export function FireButton({ onFire }: { onFire: (down: boolean) => void }) {
       onPointerUp={() => onFire(false)}
       onPointerCancel={() => onFire(false)}
       onContextMenu={(e) => e.preventDefault()}
-      className="h-28 w-28 touch-none rounded-full bg-rose-500 text-4xl shadow-lg shadow-rose-500/40 transition active:scale-90 active:bg-rose-400"
+      className="h-24 w-24 touch-none rounded-full bg-rose-500 text-4xl shadow-lg shadow-rose-500/40 transition active:scale-90 active:bg-rose-400"
     >
       💥
     </button>

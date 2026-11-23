@@ -17,14 +17,13 @@ import {
 } from '@/lib/tanky-town-audio';
 import { LEVEL_COUNT, LEVEL_DEFS, type Dir } from '@/lib/tanky-town-level';
 import type { Input, Phase, TankEvent, World } from '@/lib/tanky-town-state';
-import { createWorld, enemiesLeft, nextLevel } from '@/lib/tanky-town-world';
+import { createWorld, enemiesLeft } from '@/lib/tanky-town-world';
 
 import { DrivePad, FireButton, Lives } from './hud';
 import { EndPanel, MenuPanel } from './overlays';
 import { useTankLoop } from './use-tank-loop';
 
 const GAME = { game: 'tanky-town' };
-const CLEAR_PAUSE_MS = 2400;
 const KEYS: Record<string, Dir> = {
   ArrowRight: 0,
   ArrowDown: 1,
@@ -113,15 +112,6 @@ export function TankyTownGame() {
   const worldRef = useTankLoop(canvasRef, { inputRef, liveRef, onEvent });
   useKeyboard(inputRef, view !== null);
 
-  useEffect(() => {
-    if (view?.phase !== 'clear') return;
-    const timer = setTimeout(() => {
-      nextLevel(worldRef.current!);
-      setView(viewOf(worldRef.current!));
-    }, CLEAR_PAUSE_MS);
-    return () => clearTimeout(timer);
-  }, [view?.phase, worldRef]);
-
   const start = () => {
     unlockTankAudio();
     worldRef.current = createWorld();
@@ -132,15 +122,15 @@ export function TankyTownGame() {
 
   const ended = view?.phase === 'over' || view?.phase === 'won';
   return (
-    <div className="flex w-full max-w-3xl flex-1 flex-col items-center gap-2 self-stretch px-2 select-none">
-      <div className="flex w-full items-center justify-between px-2 text-lg font-bold text-amber-200">
+    <div className="short:grid short:grid-cols-[auto_1fr_auto] short:grid-rows-[auto_1fr_auto] short:gap-x-4 flex w-full max-w-3xl flex-1 flex-col items-center gap-1 self-stretch px-2 select-none sm:gap-2">
+      <div className="short:col-span-3 flex w-full items-center justify-between px-2 text-lg font-bold text-amber-200">
         <span aria-label={`${view?.score ?? 0} points`}>⭐ {view?.score ?? 0}</span>
         <span className="text-sm text-neutral-400">
           level {(view?.level ?? 0) + 1} of {LEVEL_COUNT}
         </span>
         <Lives lives={view?.lives ?? 3} />
       </div>
-      <div className="relative min-h-[320px] w-full flex-1">
+      <div className="short:col-start-2 short:row-start-2 short:h-full short:min-h-[200px] relative min-h-[240px] w-full flex-1">
         <canvas
           ref={canvasRef}
           className="absolute inset-0 h-full w-full touch-none"
@@ -149,12 +139,19 @@ export function TankyTownGame() {
         {!view && <MenuPanel onPlay={start} />}
         {view && ended && <EndPanel score={view.score} won={view.phase === 'won'} onPlay={start} />}
       </div>
-      <div className="h-7 text-center text-base font-semibold text-amber-100" aria-live="polite">
+      <div
+        className="short:col-span-3 short:row-start-3 h-7 text-center text-base font-semibold text-amber-100"
+        aria-live="polite"
+      >
         {banner(view)}
       </div>
-      <div className="flex w-full max-w-md items-center justify-between px-4 pb-4">
-        <DrivePad onDir={(dir) => (inputRef.current.dir = dir)} />
-        <FireButton onFire={(down) => (inputRef.current.fire = down)} />
+      <div className="short:contents flex w-full max-w-md items-center justify-between px-4 pb-2">
+        <div className="short:col-start-1 short:row-start-2">
+          <DrivePad onDir={(dir) => (inputRef.current.dir = dir)} />
+        </div>
+        <div className="short:col-start-3 short:row-start-2">
+          <FireButton onFire={(down) => (inputRef.current.fire = down)} />
+        </div>
       </div>
     </div>
   );

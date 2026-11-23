@@ -6,6 +6,7 @@ import { drive, driveEnemy, placeHero, respawnHero, spawnEnemies } from './tanky
 const START_LIVES = 3;
 const MAX_DT = 0.05;
 const CLEAR_BONUS = 500;
+const CLEAR_PAUSE = 2.4;
 
 /** Everything that belongs to one level; a new level replaces all of it. */
 function levelState(index: number) {
@@ -20,6 +21,7 @@ function levelState(index: number) {
     queue: [...level.roster],
     spawnIn: 1,
     respawnIn: 0,
+    clearIn: 0,
     kills: 0,
     phase: 'play' as const,
   };
@@ -47,6 +49,7 @@ function checkClear(world: World) {
   const last = world.levelIndex === LEVEL_COUNT - 1;
   world.score += CLEAR_BONUS;
   world.phase = last ? 'won' : 'clear';
+  world.clearIn = CLEAR_PAUSE;
   emit(world, last ? 'won' : 'clear', world.level.cake);
 }
 
@@ -69,10 +72,19 @@ function stepTanks(world: World, dt: number, input: Input) {
   }
 }
 
-/** One frame of the game. Does nothing once the level is cleared or lost. */
+/** After the party pause the next map loads by itself. */
+function stepClear(world: World, dt: number) {
+  world.clearIn -= dt;
+  if (world.clearIn > 0) return;
+  loadLevel(world, world.levelIndex + 1);
+  emit(world, 'level', world.level.player);
+}
+
+/** One frame of the game; the only way the world moves on. Frozen once won or lost. */
 export function step(world: World, dt: number, input: Input) {
-  if (world.phase !== 'play') return;
   const tick = Math.min(MAX_DT, dt);
+  if (world.phase === 'clear') return stepClear(world, tick);
+  if (world.phase !== 'play') return;
   stepTimers(world, tick);
   spawnEnemies(world, tick);
   respawnHero(world, tick);
@@ -80,9 +92,4 @@ export function step(world: World, dt: number, input: Input) {
   stepBullets(world, tick);
   stepPickup(world, tick, heroOf(world));
   checkClear(world);
-}
-
-/** Call after the "level clear" pause to roll on to the next map. */
-export function nextLevel(world: World) {
-  if (world.phase === 'clear') loadLevel(world, world.levelIndex + 1);
 }
