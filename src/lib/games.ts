@@ -82,7 +82,7 @@ export const GAMES: Game[] = [
   {
     slug: 'tanky-town',
     title: 'Tanky Town',
-    tagline: 'Drive a little tank, guard the birthday cake, beat the grumpy tanks on 5 levels.',
+    tagline: 'Drive a little tank, guard the birthday cake, beat the grumpy tanks on 25 levels.',
     accent: '#f59e0b',
     Icon: TankIcon,
   },

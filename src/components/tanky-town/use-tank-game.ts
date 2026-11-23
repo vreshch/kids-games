@@ -66,7 +66,7 @@ export function useTankGame() {
       if (peers === 2) return now === 'host' || begin('host');
       if (now === 'guest') begin('idle');
     },
-    onAgain: () => begin('host'),
+    onAgain: () => begin('host', retryLevel()),
   });
 
   const worldRef = useTankLoop(canvasRef, {
@@ -89,8 +89,8 @@ export function useTankGame() {
   useKeyboard(inputRef, mode !== 'idle');
 
   /** A fresh world for the new mode; a guest's stays empty until the first snapshot. */
-  function begin(next: Mode) {
-    const world = createWorld(Math.random, 0, next === 'solo' ? 1 : 2);
+  function begin(next: Mode, level = 0) {
+    const world = createWorld(Math.random, level, next === 'solo' ? 1 : 2);
     worldRef.current = world;
     modeRef.current = next;
     setMode(next);
@@ -110,7 +110,9 @@ export function useTankGame() {
     history.replaceState(null, '', `?room=${room}`);
     duo.join(room);
   };
-  const playAgain = () => (mode === 'guest' ? duo.askAgain() : begin(mode));
+  /** After a loss the same level starts again with a fresh score; after a win, level one. */
+  const retryLevel = () => (worldRef.current?.phase === 'over' ? worldRef.current.levelIndex : 0);
+  const playAgain = () => (mode === 'guest' ? duo.askAgain() : begin(mode, retryLevel()));
   const link = duo.roomId ? `${location.origin}${location.pathname}?room=${duo.roomId}` : '';
 
   return { canvasRef, inputRef, mode, view, duo, invited, link, playSolo, playTogether, playAgain };

@@ -1,3 +1,5 @@
+import { MORE_LEVELS } from './tanky-town-more-levels';
+
 /** 0 right, 1 down, 2 left, 3 up. */
 export type Dir = 0 | 1 | 2 | 3;
 export const DX = [1, 0, -1, 0] as const;
@@ -21,13 +23,13 @@ export type Level = {
   maxActive: number;
 };
 
-type LevelDef = { name: string; roster: string; maxActive: number; map: string[] };
+export type LevelDef = { name: string; roster: string; maxActive: number; map: string[] };
 
 const TILES: Record<string, Tile> = { B: 'brick', S: 'steel', W: 'water', G: 'bush', C: 'cake' };
 const KINDS: Record<string, EnemyKind> = { b: 'basic', f: 'fast', t: 'tough' };
 
 /** Map letters: B brick, S steel, W water, G bush, C cake, P player, E enemy gate. */
-export const LEVEL_DEFS: LevelDef[] = [
+const FIRST_LEVELS: LevelDef[] = [
   {
     name: 'Brick Garden',
     roster: 'bbbbbb',
@@ -129,6 +131,9 @@ export const LEVEL_DEFS: LevelDef[] = [
     ],
   },
 ];
+
+/** Every level in play order: the five starters, then twenty more. */
+export const LEVEL_DEFS: LevelDef[] = [...FIRST_LEVELS, ...MORE_LEVELS];
 
 export const LEVEL_COUNT = LEVEL_DEFS.length;
 

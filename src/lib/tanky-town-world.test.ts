@@ -31,8 +31,9 @@ const beaten = (level = 0) => Object.assign(quiet(level), { queue: [] });
 const types = (world: World) => world.events.map((event) => event.type);
 
 describe('levels', () => {
-  it('has five maps of 11 by 13 with one cake, one home and three gates', () => {
-    expect(LEVEL_COUNT).toBe(5);
+  it('has 25 maps of 11 by 13 with one cake, one home and three gates', () => {
+    expect(LEVEL_COUNT).toBe(25);
+    expect(new Set(LEVEL_DEFS.map((def) => def.name)).size).toBe(25);
     for (let i = 0; i < LEVEL_COUNT; i++) {
       const level = parseLevel(i);
       expect(LEVEL_DEFS[i].map.every((row) => row.length === 11)).toBe(true);
@@ -66,10 +67,10 @@ describe('levels', () => {
     }
   });
 
-  it('gets harder: more enemies on every level', () => {
+  it('gets harder: never fewer enemies than the level before, 6 at first, 20 at the end', () => {
     const sizes = LEVEL_DEFS.map((def) => def.roster.length);
     expect([...sizes].sort((a, b) => a - b)).toEqual(sizes);
-    expect(new Set(sizes).size).toBe(LEVEL_COUNT);
+    expect([sizes[0], sizes.at(-1)]).toEqual([6, 20]);
   });
 });
 
@@ -289,12 +290,12 @@ describe('progress', () => {
 
   it('plays from level one to the win through step alone', () => {
     const world = createWorld(fixed(0.5));
-    for (let t = 0; t < 60 && world.phase !== 'won'; t += 0.02) {
+    for (let t = 0; t < 120 && world.phase !== 'won'; t += 0.02) {
       world.queue = [];
       world.tanks = world.tanks.filter((tank) => tank.owner === 'player');
       step(world, 0.02, [IDLE]);
     }
     expect(world.phase).toBe('won');
-    expect(world.score).toBe(2500);
+    expect(world.score).toBe(LEVEL_COUNT * 500);
   });
 });
