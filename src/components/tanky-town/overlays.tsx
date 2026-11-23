@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from 'react';
 
+import { LEVEL_COUNT } from '@/lib/tanky-town-level';
+
 function Overlay({ children }: { children: ReactNode }) {
   return (
     <div className="absolute inset-0 flex touch-manipulation flex-col items-center justify-center gap-4 rounded-2xl bg-black/65 px-4 text-center backdrop-blur-[2px]">
@@ -56,7 +58,7 @@ export function MenuPanel({ invited, onSolo, onTogether }: MenuProps) {
         onPlay={onTogether}
       />
       <span className="max-w-xs px-6 text-sm text-neutral-400">
-        5 levels. Hold the pad to drive, tap 💥 to shoot. Keyboard: arrows and space.
+        {LEVEL_COUNT} levels. Hold the pad to drive, tap 💥 to shoot. Keyboard: arrows and space.
       </span>
     </Overlay>
   );
@@ -109,9 +111,9 @@ export function NoticePanel({ icon, title, text, action }: NoticeProps) {
   );
 }
 
-type EndProps = { score: number; won: boolean; onPlay: () => void };
+type EndProps = { score: number; level: number; won: boolean; onPlay: () => void };
 
-export function EndPanel({ score, won, onPlay }: EndProps) {
+export function EndPanel({ score, level, won, onPlay }: EndProps) {
   return (
     <Overlay>
       <span className="text-5xl">{won ? '🏆' : '🎂'}</span>
@@ -122,6 +124,7 @@ export function EndPanel({ score, won, onPlay }: EndProps) {
         You got <b className="text-amber-200">{score}</b> points
       </span>
       <PlayButton label="Play again" onPlay={onPlay} />
+      {!won && <span className="text-sm text-neutral-400">try level {level + 1} again</span>}
     </Overlay>
   );
 }

@@ -29,7 +29,14 @@ function Panel({ game }: { game: Lobby }) {
       <NoticePanel icon="👋" title="Your friend left" text="Waiting for them to come back..." />
     );
   if (view && (view.phase === 'over' || view.phase === 'won'))
-    return <EndPanel score={view.score} won={view.phase === 'won'} onPlay={game.playAgain} />;
+    return (
+      <EndPanel
+        score={view.score}
+        level={view.level}
+        won={view.phase === 'won'}
+        onPlay={game.playAgain}
+      />
+    );
   return null;
 }
 
