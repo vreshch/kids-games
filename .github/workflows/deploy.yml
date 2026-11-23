@@ -98,6 +98,7 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             docker stack deploy -c docker-compose.yml kids-games --with-registry-auth
             docker service update --force kids-games_web
+            docker service update --force kids-games_relay
             docker service ps kids-games_web --no-trunc --format "table {{.Name}}\t{{.CurrentState}}\t{{.Error}}"
           EOF
 
@@ -105,14 +106,16 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             LIVE=$(curl -sf "${{ env.SITE_URL }}/health" 2>/dev/null | jq -r '.data.version // empty') || true
-            if [ "$LIVE" = "${{ github.sha }}" ]; then
-              echo "✅ Live commit: $LIVE"
+            RELAY=$(curl -sf "${{ env.SITE_URL }}/relay/health" 2>/dev/null | jq -r '.data.version // empty') || true
+            if [ "$LIVE" = "${{ github.sha }}" ] && [ "$RELAY" = "${{ github.sha }}" ]; then
+              echo "✅ PASS web commit: $LIVE"
+              echo "✅ PASS relay commit: $RELAY"
               exit 0
             fi
-            echo "⏳ $i/30 - got: ${LIVE:-no response}"
+            echo "⏳ $i/30 - web: ${LIVE:-no response}, relay: ${RELAY:-no response}"
             sleep 10
           done
-          echo "❌ ${{ env.SITE_URL }} is not serving this commit"
+          echo "❌ FAIL web: ${LIVE:-no response}, relay: ${RELAY:-no response}, want ${{ github.sha }}"
           exit 1
 
       - name: 🧹 Cleanup

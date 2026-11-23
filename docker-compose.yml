@@ -51,6 +51,56 @@ services:
       retries: 3
       start_period: 40s
 
+  # Passes messages between two players of one room; rooms live in memory only.
+  relay:
+    image: ghcr.io/vreshch/kids-games:latest
+    command: ['node', 'relay/relay.ts']
+    restart: unless-stopped
+    environment:
+      RELAY_HOST: 0.0.0.0
+      RELAY_PORT: '3001'
+      RELAY_ORIGINS: https://games.vreshch.com
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      update_config:
+        # two relays at once would split a room between them
+        order: stop-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+
+        - traefik.http.routers.kids-games-relay.rule=Host(`games.vreshch.com`) && PathPrefix(`/relay/`)
+        - traefik.http.routers.kids-games-relay.entrypoints=https
+        - traefik.http.routers.kids-games-relay.tls=true
+        - traefik.http.routers.kids-games-relay.tls.certresolver=letsencrypt
+        - traefik.http.routers.kids-games-relay.service=kids-games-relay
+
+        - traefik.http.services.kids-games-relay.loadbalancer.server.port=3001
+
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 96M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
+    healthcheck:
+      test:
+        ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:3001/relay/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 networks:
   traefik-public:
     external: true
