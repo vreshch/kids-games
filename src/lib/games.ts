@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ComponentType } from 'react';
 
 import {
+  CookieIcon,
   CrystalIcon,
   FrankieIcon,
   MunchIcon,
@@ -85,6 +86,13 @@ export const GAMES: Game[] = [
     tagline: 'Drive a little tank, guard the birthday cake, beat the grumpy tanks on 25 levels.',
     accent: '#f59e0b',
     Icon: TankIcon,
+  },
+  {
+    slug: 'yummy-plan',
+    title: 'Yummy Plan',
+    tagline: 'Tap the plan, fill the bowl, bake cookies and more. Find the secret recipe!',
+    accent: '#f472b6',
+    Icon: CookieIcon,
   },
 ];
 

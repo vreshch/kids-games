@@ -174,3 +174,21 @@ export function TankIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function CookieIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <circle cx={24} cy={24} r={20} fill="#d97706" />
+      <circle cx={24} cy={24} r={20} fill="none" stroke="#92400e" strokeWidth={2} />
+      <circle cx={13} cy={14} r={2.6} fill="#451a03" />
+      <circle cx={36} cy={16} r={2.2} fill="#451a03" />
+      <circle cx={11} cy={31} r={2.2} fill="#451a03" />
+      <circle cx={37} cy={32} r={2.6} fill="#451a03" />
+      <circle cx={18} cy={21} r={4.5} fill="#fffdf5" />
+      <circle cx={30} cy={21} r={4.5} fill="#fffdf5" />
+      <circle cx={19} cy={21} r={2} fill="#111827" />
+      <circle cx={31} cy={21} r={2} fill="#111827" />
+      <path d="M 16 29 Q 24 38 32 29 Z" fill="#7f1d1d" />
+    </svg>
+  );
+}
