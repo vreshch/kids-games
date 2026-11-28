@@ -45,7 +45,10 @@ export function useDuo(options: Options) {
   const net = useRef(fresh());
   const room = useRoom<WiggleMessage>({
     onPeers: (seat, count) => {
-      if (count < 2) net.current.remote = IDLE;
+      if (count < 2) {
+        net.current.remote = IDLE;
+        net.current.outbox = [];
+      }
       options.onRole(seat, count);
     },
     onMessage: (message) => {
