@@ -1,6 +1,7 @@
 import type { StaticImageData } from 'next/image';
 
 import crystalRooms from '../../../docs/screenshots/crystal-rooms.png';
+import daddyDollhouse from '../../../docs/screenshots/daddy-dollhouse.png';
 import frankie from '../../../docs/screenshots/frankie.png';
 import perot from '../../../docs/screenshots/perot.png';
 import scarySmile from '../../../docs/screenshots/scary-smile.png';
@@ -19,4 +20,5 @@ export const BOOK_SHOTS: Record<string, StaticImageData> = {
   'wiggle-snakes': wiggleSnakes,
   'tanky-town': tankyTown,
   'yummy-plan': yummyPlan,
+  'daddy-dollhouse': daddyDollhouse,
 };
