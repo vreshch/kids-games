@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { GAMES } from '../src/lib/games';
+import { INGREDIENTS, RECIPES } from '../src/lib/yummy-recipes';
 
 test('home shows the game grid and byline', async ({ page }) => {
   await page.goto('/');
@@ -64,6 +65,25 @@ test('tanky town: a friend joins by link and both play the same game', async ({
 
   await friend.close();
   await expect(page.getByText('Your friend left', { exact: false })).toBeVisible();
+});
+
+test('yummy plan: follow the plan, fill the bowl and bake a cookie', async ({ page }) => {
+  await page.goto('/yummy-plan');
+  // Play only answers once React has hydrated, so retry the tap until the kitchen shows.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Play', exact: true }).click({ timeout: 1000 });
+    await expect(page.getByRole('button', { name: 'Plan', exact: true })).toBeVisible({
+      timeout: 1000,
+    });
+  }).toPass({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Plan', exact: true }).click();
+  await expect(page.getByLabel('Plan says flour')).toBeVisible();
+  for (const id of RECIPES[0].needs) {
+    await page.getByRole('button', { name: `Add ${INGREDIENTS[id].name}`, exact: true }).click();
+  }
+  await page.getByRole('button', { name: 'Bake' }).click();
+  // Any tap gives a picture: a yummy cookie, or a funny burnt one and another try.
+  await expect(page.getByRole('img', { name: /(Yummy|Funny burnt) cookie/ })).toBeVisible();
 });
 
 test('frankie feeds a singer a fruit', async ({ page }) => {
