@@ -40,6 +40,7 @@ export function openRoom<M extends { t: string }>(id: string, handlers: Handlers
   let closed = false;
 
   const hear = (data: string) => {
+    if (closed) return;
     const message = JSON.parse(data) as RelayMessage;
     if (message.t === 'seat') handlers.onSeat(message.seat);
     else if (message.t === 'peers') handlers.onPeers(message.count);

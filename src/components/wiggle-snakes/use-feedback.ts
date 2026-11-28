@@ -7,9 +7,8 @@ import { playGobble, playMunch, playOops } from '@/lib/wiggle-audio';
 import type { NetEvent } from '@/lib/wiggle-net';
 import { loadBest, recordBest } from '@/lib/wiggle-skins';
 
+import { noSubscribe } from './browser-store';
 import type { Ending } from './overlays';
-
-const noSubscribe = () => () => {};
 
 /** Sounds, the "you gobbled" toast and the ending, for the snake in seat `me()`. */
 export function useFeedback(me: () => number, onOver: () => void) {

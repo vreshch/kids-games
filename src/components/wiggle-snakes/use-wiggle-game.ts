@@ -12,7 +12,8 @@ import { removePlayer, spawnPlayer, type World } from '@/lib/wiggle-world';
 
 import { roomInUrl } from '../duo/room';
 import { roomLink } from '../duo/share-link';
-import { readHud, steer, stepLocal, type Hud } from './arena-step';
+import { readHud, spawnFriend, steer, stepLocal, type Hud } from './arena-step';
+import { isTouch, noSubscribe } from './browser-store';
 import { freshWorld, useArena, type ArenaInput } from './use-arena';
 import { useDuo } from './use-duo';
 import { useFeedback } from './use-feedback';
@@ -24,8 +25,6 @@ export type Mode = 'idle' | 'solo' | 'host' | 'guest';
 export type Phase = 'menu' | 'play' | 'over';
 
 const GAME = { game: 'wiggle-snakes' };
-const noSubscribe = () => () => {};
-const isTouch = () => window.matchMedia('(pointer: coarse)').matches;
 
 /** Everything the Wiggle Snakes screen does; the arena itself lives in the loop's World. */
 export function useWiggleGame() {
@@ -70,9 +69,7 @@ export function useWiggleGame() {
     },
     onSpawn: (friendSkin) => {
       const world = worldRef.current;
-      if (world && modeRef.current === 'host' && !world.players[1]?.alive) {
-        spawnPlayer(world, friendSkin, 1);
-      }
+      if (world && modeRef.current === 'host') spawnFriend(world, friendSkin);
     },
     onSuper: () => {
       if (worldRef.current) activateSuper(worldRef.current, 1);
@@ -142,6 +139,7 @@ export function useWiggleGame() {
     duo.leave();
     history.replaceState(null, '', location.pathname);
     if (modeRef.current === 'guest') worldRef.current = freshWorld();
+    else if (worldRef.current) removePlayer(worldRef.current, 1);
     setMode('solo');
     spawnMine();
     trackEvent('game_start', GAME);

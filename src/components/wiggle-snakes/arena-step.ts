@@ -1,6 +1,6 @@
 import { toNetEvent } from '@/lib/wiggle-net';
 import { superState } from '@/lib/wiggle-rules';
-import { standings, stepWorld, type Standing, type World } from '@/lib/wiggle-world';
+import { spawnPlayer, standings, stepWorld, type Standing, type World } from '@/lib/wiggle-world';
 
 import type { Steer } from './use-duo';
 
@@ -32,4 +32,9 @@ export function stepLocal(world: World, dt: number) {
   const events = world.events.map(toNetEvent);
   world.events.length = 0;
   return events;
+}
+
+/** Host: the friend's snake appears, unless it is still alive. */
+export function spawnFriend(world: World, skin: number) {
+  if (!world.players[1]?.alive) spawnPlayer(world, skin, 1);
 }
