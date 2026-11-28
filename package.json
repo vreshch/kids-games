@@ -16,7 +16,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@agentage/observability": "^1.6.2",
+    "@agentage/observability": "^1.6.3",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@vercel/otel": "^2.3.0",
@@ -36,7 +36,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.187.0",
     "@types/ws": "^8.18.2",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "eslint-config-prettier": "^10.1.8",
