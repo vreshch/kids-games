@@ -9,6 +9,8 @@ export const BOT_COUNT = 14;
 const BOOST_COST = 8;
 const DROP_EVERY = 0.12;
 const SAFE_SPAWN = 700;
+const FRIEND_NEAR = 250;
+export const PLAYER_NAMES = ['You', 'Friend'];
 
 export type WorldEvent =
   { type: 'gobble'; eater: Snake; victim: Snake } | { type: 'munch'; snake: Snake; value: number };
@@ -18,9 +20,10 @@ export type World = {
   arenaRadius: number;
   snakes: Snake[];
   foods: Food[];
-  player: Snake | null;
-  superUntil: number;
-  superReadyAt: number;
+  /** The players' snakes by seat; a gobbled one stays here, dead, until it comes back. */
+  players: (Snake | null)[];
+  superUntil: number[];
+  superReadyAt: number[];
   respawnAt: number[];
   nextId: number;
   skinCount: number;
@@ -34,9 +37,9 @@ export function createWorld(skinCount: number, rand: () => number = Math.random)
     arenaRadius: ARENA_RADIUS,
     snakes: [],
     foods: [],
-    player: null,
-    superUntil: 0,
-    superReadyAt: 0,
+    players: [],
+    superUntil: [],
+    superReadyAt: [],
     respawnAt: [],
     nextId: 1,
     skinCount,
@@ -48,14 +51,24 @@ export function createWorld(skinCount: number, rand: () => number = Math.random)
   return world;
 }
 
-/** A spot no living head is close to, so nobody spawns inside a hungry mouth. */
-function safeSpot(world: World, spread: number): Vec {
-  const heads = world.snakes.filter((s) => s.alive).map((s) => s.body[0]);
+/** A random spot in the arena, or close to a friend when there is one. */
+function randomSpot(world: World, spread: number, near?: Snake): Vec {
+  const angle = world.rand() * Math.PI * 2;
+  const center = near?.body[0] ?? { x: 0, y: 0 };
+  const dist = near
+    ? FRIEND_NEAR + world.rand() * FRIEND_NEAR
+    : Math.sqrt(world.rand()) * world.arenaRadius * spread;
+  const spot = { x: center.x + Math.cos(angle) * dist, y: center.y + Math.sin(angle) * dist };
+  const out = Math.hypot(spot.x, spot.y) / (world.arenaRadius * 0.9);
+  return out > 1 ? { x: spot.x / out, y: spot.y / out } : spot;
+}
+
+/** A spot no hungry head is close to, so nobody spawns inside a mouth; friends do not count. */
+function safeSpot(world: World, spread: number, near?: Snake): Vec {
+  const heads = world.snakes.filter((s) => s.alive && s !== near).map((s) => s.body[0]);
   let spot: Vec = { x: 0, y: 0 };
   for (let tries = 0; tries < 25; tries++) {
-    const dist = Math.sqrt(world.rand()) * world.arenaRadius * spread;
-    const angle = world.rand() * Math.PI * 2;
-    spot = { x: Math.cos(angle) * dist, y: Math.sin(angle) * dist };
+    spot = randomSpot(world, spread, tries < 15 ? near : undefined);
     if (heads.every((h) => Math.hypot(h.x - spot.x, h.y - spot.y) > SAFE_SPAWN)) break;
   }
   return spot;
@@ -85,29 +98,41 @@ export function spawnBot(world: World) {
   return bot;
 }
 
-export function spawnPlayer(world: World, skin: number) {
-  world.snakes = world.snakes.filter((s) => !s.isPlayer);
+/** The living snake of the other player, if any. */
+export const friendOf = (world: World, seat: number) =>
+  world.players.find((s, i) => i !== seat && s?.alive) ?? null;
+
+/** A fresh snake for one seat, near the friend and never in the friend's colours. */
+export function spawnPlayer(world: World, skin: number, seat = 0) {
+  removePlayer(world, seat);
+  const friend = friendOf(world, seat);
   const player = createSnake({
     id: world.nextId++,
-    name: 'You',
-    skin,
+    name: PLAYER_NAMES[seat] ?? 'Friend',
+    skin: friend?.skin === skin ? (skin + 1) % world.skinCount : skin,
     isPlayer: true,
+    seat,
     mass: START_MASS,
     angle: world.rand() * Math.PI * 2,
-    ...safeSpot(world, 0.5),
+    ...safeSpot(world, 0.5, friend ?? undefined),
   });
   world.snakes.push(player);
-  world.player = player;
-  world.superUntil = 0;
-  world.superReadyAt = world.time;
+  world.players[seat] = player;
+  world.superUntil[seat] = 0;
+  world.superReadyAt[seat] = world.time;
   return player;
+}
+
+/** Takes a seat's snake out of the arena, for example when the friend leaves. */
+export function removePlayer(world: World, seat: number) {
+  world.snakes = world.snakes.filter((s) => s.seat !== seat);
+  world.players[seat] = null;
 }
 
 export function stepWorld(world: World, dt: number) {
   world.time += dt;
-  const { player } = world;
-  const superSnake = player?.alive && isSuper(world, player) ? player : null;
-  const surroundings = { ...world, superSnake };
+  const superSnakes = world.snakes.filter((s) => s.alive && isSuper(world, s));
+  const surroundings = { ...world, superSnakes };
   for (const snake of world.snakes) {
     if (!snake.alive) continue;
     if (!snake.isPlayer) thinkBot(snake, surroundings, dt);
@@ -142,16 +167,24 @@ function refill(world: World) {
     world.foods.push(randomFood(world.rand, world.arenaRadius));
 }
 
-export type Standing = { name: string; length: number; isPlayer: boolean; rank: number };
+export type Standing = {
+  name: string;
+  length: number;
+  isPlayer: boolean;
+  isFriend: boolean;
+  rank: number;
+};
 
-export function standings(world: World): Standing[] {
+/** The board as one player sees it: their own snake is "You", the other one "Friend". */
+export function standings(world: World, me = 0): Standing[] {
   return world.snakes
     .filter((s) => s.alive)
     .sort((a, b) => b.mass - a.mass)
     .map((s, i) => ({
-      name: s.name,
+      name: s.seat === null ? s.name : PLAYER_NAMES[s.seat === me ? 0 : 1],
       length: Math.round(s.mass),
-      isPlayer: s.isPlayer,
+      isPlayer: s.seat === me,
+      isFriend: s.seat !== null && s.seat !== me,
       rank: i + 1,
     }));
 }

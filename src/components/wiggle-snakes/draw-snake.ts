@@ -13,7 +13,13 @@ function trace(ctx: CanvasRenderingContext2D, body: Vec[], from: number, to: num
   ctx.lineTo(body[to].x + 0.01, body[to].y);
 }
 
-export function drawSnake(ctx: CanvasRenderingContext2D, world: World, snake: Snake, zoom: number) {
+export function drawSnake(
+  ctx: CanvasRenderingContext2D,
+  world: World,
+  snake: Snake,
+  zoom: number,
+  labelled = !snake.isPlayer
+) {
   const { body } = snake;
   const r = radiusFor(snake.mass);
   const last = body.length - 1;
@@ -50,12 +56,13 @@ export function drawSnake(ctx: CanvasRenderingContext2D, world: World, snake: Sn
   ctx.stroke();
 
   drawFace(ctx, snake, r);
-  if (!snake.isPlayer) {
-    ctx.font = `600 ${13 / zoom}px system-ui, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.fillText(snake.name, body[0].x, body[0].y + r + 18 / zoom);
-  }
+  if (!labelled) return;
+  // the friend gets a picture instead of a name, big enough to spot from far away
+  const friend = snake.seat !== null;
+  ctx.font = `600 ${(friend ? 22 : 13) / zoom}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.fillText(friend ? '👫' : snake.name, body[0].x, body[0].y + r + (friend ? 26 : 18) / zoom);
 }
 
 export function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string) {

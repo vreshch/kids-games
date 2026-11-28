@@ -5,6 +5,8 @@ export type Snake = {
   name: string;
   skin: number;
   isPlayer: boolean;
+  /** Which player drives it: 0 is the host, 1 the friend; null for a bot. */
+  seat: number | null;
   /** body[0] is the head; the rest are trail samples SEGMENT_SPACING apart. */
   body: Vec[];
   angle: number;
@@ -30,9 +32,10 @@ export const segmentsFor = (mass: number) => Math.min(500, Math.round(10 + mass 
 /** Small snakes turn on a dime, big ones swing wide. */
 export const turnRateFor = (mass: number) => 2 + 30 / radiusFor(mass);
 
-type SnakeInit = Pick<Snake, 'id' | 'name' | 'skin' | 'isPlayer' | 'mass' | 'angle'> & Vec;
+type SnakeInit = Pick<Snake, 'id' | 'name' | 'skin' | 'isPlayer' | 'mass' | 'angle'> &
+  Vec & { seat?: number | null };
 
-export function createSnake({ x, y, angle, mass, ...rest }: SnakeInit): Snake {
+export function createSnake({ x, y, angle, mass, seat, ...rest }: SnakeInit): Snake {
   const body: Vec[] = [];
   for (let i = 0; i <= segmentsFor(mass); i++) {
     body.push({
@@ -42,6 +45,7 @@ export function createSnake({ x, y, angle, mass, ...rest }: SnakeInit): Snake {
   }
   return {
     ...rest,
+    seat: seat ?? (rest.isPlayer ? 0 : null),
     body,
     angle,
     targetAngle: angle,

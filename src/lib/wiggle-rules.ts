@@ -7,26 +7,31 @@ export const SUPER_RECHARGE = 12;
 const RESPAWN_DELAY = 2;
 
 export const isSuper = (world: World, snake: Snake) =>
-  snake.isPlayer && world.time < world.superUntil;
+  snake.seat !== null && world.time < (world.superUntil[snake.seat] ?? 0);
 
-export function superState(world: World) {
-  const active = world.time < world.superUntil;
-  const waiting = Math.max(0, world.superReadyAt - world.time);
+/** Each player has its own super button. */
+export function superState(world: World, seat = 0) {
+  const until = world.superUntil[seat] ?? 0;
+  const active = world.time < until;
+  const waiting = Math.max(0, (world.superReadyAt[seat] ?? 0) - world.time);
   return {
     active,
     ready: !active && waiting === 0,
-    remaining: Math.max(0, world.superUntil - world.time),
+    remaining: Math.max(0, until - world.time),
     charge: active ? 1 : 1 - Math.min(1, waiting / SUPER_RECHARGE),
   };
 }
 
 /** The big button on top: for a few seconds the player can gobble every snake it touches. */
-export function activateSuper(world: World) {
-  if (!world.player?.alive || !superState(world).ready) return false;
-  world.superUntil = world.time + SUPER_DURATION;
-  world.superReadyAt = world.superUntil + SUPER_RECHARGE;
+export function activateSuper(world: World, seat = 0) {
+  if (!world.players[seat]?.alive || !superState(world, seat).ready) return false;
+  world.superUntil[seat] = world.time + SUPER_DURATION;
+  world.superReadyAt[seat] = world.superUntil[seat] + SUPER_RECHARGE;
   return true;
 }
+
+/** Friends never gobble each other; they just slide past. */
+const friends = (a: Snake, b: Snake) => a.seat !== null && b.seat !== null;
 
 /** Alisa's rule: when two snakes touch, the smaller one is gobbled - unless super is on. */
 export function loserOf(world: World, a: Snake, b: Snake) {
@@ -50,7 +55,7 @@ export function headTouches(head: Vec, headRadius: number, other: Snake) {
 export function resolveContacts(world: World) {
   for (const a of world.snakes) {
     for (const b of world.snakes) {
-      if (a === b || !a.alive || !b.alive) continue;
+      if (a === b || !a.alive || !b.alive || friends(a, b)) continue;
       if (!headTouches(a.body[0], radiusFor(a.mass), b)) continue;
       const loser = loserOf(world, a, b);
       gobble(world, loser === a ? b : a, loser);

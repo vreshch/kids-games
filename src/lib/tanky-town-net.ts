@@ -3,8 +3,6 @@ import { DX, DY, parseLevel, type Tile } from './tanky-town-level';
 import { SPEED, type Input, type TankEvent, type World } from './tanky-town-state';
 
 const CODES: Tile[] = ['empty', 'brick', 'cracked', 'steel', 'water', 'bush', 'cake'];
-const ROOM_ID = /^[a-z0-9]{4,12}$/;
-const ROOM_LETTERS = 'abcdefghjkmnpqrstuvwxyz23456789';
 
 /** What the host sends about 30 times a second: the whole game, tiles packed one digit each. */
 export type Snapshot = Pick<
@@ -58,15 +56,6 @@ export function coast(world: World, dt: number) {
     bullet.x += DX[bullet.dir] * BULLET_SPEED[bullet.owner] * dt;
     bullet.y += DY[bullet.dir] * BULLET_SPEED[bullet.owner] * dt;
   }
-}
-
-export const isRoomId = (value: unknown): value is string =>
-  typeof value === 'string' && ROOM_ID.test(value);
-
-/** Six letters that are easy to read aloud: no 0/o, 1/l/i. */
-export function newRoomId(rng: () => number = Math.random) {
-  const pick = () => ROOM_LETTERS[Math.floor(rng() * ROOM_LETTERS.length)];
-  return Array.from({ length: 6 }, pick).join('');
 }
 
 export const sameInput = (a: Input, b: Input) => a.dir === b.dir && a.fire === b.fire;

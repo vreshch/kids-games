@@ -55,7 +55,8 @@ export function drawFrame(
   world: World,
   cam: Camera,
   { w, h, dpr }: Screen,
-  assets: Assets
+  assets: Assets,
+  me = 0
 ) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = '#07091a';
@@ -71,13 +72,15 @@ export function drawFrame(
   };
   drawFloor(ctx, world.arenaRadius, view, assets);
   drawFood(ctx, world, view, assets);
-  const order = [...world.snakes].sort((a, b) => Number(a.isPlayer) - Number(b.isPlayer));
+  // players on top, and this player's own snake on top of the friend's
+  const rank = (snake: Snake) => (snake.seat === null ? 0 : snake.seat === me ? 2 : 1);
+  const order = [...world.snakes].sort((a, b) => rank(a) - rank(b));
   for (const snake of order) {
-    if (snake.alive && onScreen(snake, view)) drawSnake(ctx, world, snake, s);
+    if (snake.alive && onScreen(snake, view)) drawSnake(ctx, world, snake, s, snake.seat !== me);
   }
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawMinimap(ctx, world, Math.min(w, h) < 500 ? 64 : 84);
+  drawMinimap(ctx, world, Math.min(w, h) < 500 ? 64 : 84, me);
 }
 
 function drawFloor(ctx: CanvasRenderingContext2D, radius: number, view: View, assets: Assets) {
@@ -119,7 +122,9 @@ function onScreen(snake: Snake, view: View) {
   );
 }
 
-function drawMinimap(ctx: CanvasRenderingContext2D, world: World, size: number) {
+const FRIEND_DOT = '#5eead4';
+
+function drawMinimap(ctx: CanvasRenderingContext2D, world: World, size: number, me: number) {
   const half = size / 2;
   const cx = 12 + half;
   const cy = 12 + half;
@@ -131,7 +136,8 @@ function drawMinimap(ctx: CanvasRenderingContext2D, world: World, size: number) 
   for (const snake of world.snakes) {
     if (!snake.alive) continue;
     const head = snake.body[0];
-    const color = snake.isPlayer ? '#ffffff' : `${SKINS[snake.skin]?.colors[0] ?? '#ffffff'}bb`;
+    const skin = `${SKINS[snake.skin]?.colors[0] ?? '#ffffff'}bb`;
+    const color = snake.seat === null ? skin : snake.seat === me ? '#ffffff' : FRIEND_DOT;
     const r = snake.isPlayer ? 3.5 : 1.2 + radiusFor(snake.mass) / 16;
     dot(ctx, cx + head.x * k, cy + head.y * k, r, color);
   }

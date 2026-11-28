@@ -1,129 +1,75 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type PointerEvent,
-} from 'react';
-
-import { trackEvent } from '@/lib/analytics';
-import { playGobble, playMunch, playOops, playSuper, unlockWiggleAudio } from '@/lib/wiggle-audio';
-import { loadBest, loadSkin, recordBest, saveSkin } from '@/lib/wiggle-skins';
-import { activateSuper, superState } from '@/lib/wiggle-rules';
-import {
-  spawnPlayer,
-  standings,
-  type Standing,
-  type World,
-  type WorldEvent,
-} from '@/lib/wiggle-world';
+import type { PointerEvent } from 'react';
 
 import { BoostButton, LengthBadge, Leaderboard, SuperButton } from './hud';
-import { GameOverPanel, MenuPanel, type Ending } from './overlays';
-import { useArena } from './use-arena';
+import { GameOverPanel, MenuPanel, NoticePanel, SharePanel } from './overlays';
+import { useWiggleGame, type WiggleGame } from './use-wiggle-game';
 
-type Phase = 'menu' | 'play' | 'over';
-type Hud = { board: Standing[]; player?: Standing; total: number } & ReturnType<typeof superState>;
+/** The screen state the panels need; no refs, so it is safe to read while rendering. */
+type Lobby = Omit<WiggleGame, 'canvasRef' | 'inputRef'>;
 
-const GAME = { game: 'wiggle-snakes' };
-const noSubscribe = () => () => {};
-const isTouch = () => window.matchMedia('(pointer: coarse)').matches;
+/** The one panel that covers the arena right now, if any. */
+function Panel({ game }: { game: Lobby }) {
+  const { mode, phase, duo, hud, ending } = game;
+  const alone = { label: '▶ Play alone', onPlay: game.playSolo };
+  if (duo.status === 'full')
+    return <NoticePanel icon="🙈" title="This game already has two players" action={alone} />;
+  if (duo.status === 'expired')
+    return <NoticePanel icon="⏰" title="This link is too old" action={alone} />;
+  if (phase === 'menu' && duo.status === 'off')
+    return (
+      <MenuPanel
+        skin={game.skin}
+        best={game.best}
+        invited={!!game.invited}
+        onSkin={game.pickSkin}
+        onPlay={game.playSolo}
+        onTogether={game.playTogether}
+      />
+    );
+  if (mode === 'idle' && game.invited && duo.seat < 0)
+    return <NoticePanel icon="🚀" title="Joining your friend..." />;
+  if (mode === 'idle') return <SharePanel link={game.link} onAlone={game.playSolo} />;
+  if (mode === 'guest' && (duo.status !== 'open' || duo.peers < 2))
+    return (
+      <NoticePanel
+        icon="👋"
+        title="Your friend left"
+        text="⏳ Waiting for them to come back..."
+        action={alone}
+      />
+    );
+  if (phase === 'over' && ending)
+    return (
+      <GameOverPanel
+        ending={ending}
+        onPlay={game.playAgain}
+        onMenu={mode === 'solo' ? game.toMenu : undefined}
+      />
+    );
+  if (mode === 'guest' && !hud?.player)
+    return <NoticePanel icon="🚀" title="Joining your friend..." />;
+  return null;
+}
 
-function readHud(world: World): Hud {
-  const board = standings(world);
-  return {
-    board,
-    player: board.find((s) => s.isPlayer),
-    total: board.length,
-    ...superState(world),
-  };
+/** A small note under the super button while the host plays on alone. */
+function FriendNote({ game }: { game: Lobby }) {
+  const { mode, duo } = game;
+  if (mode !== 'host') return null;
+  const text = duo.status === 'lost' ? '📡 Connecting...' : duo.peers < 2 ? '👋 Friend left' : null;
+  if (!text) return null;
+  return (
+    <div className="pointer-events-none absolute top-28 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1 text-sm font-semibold whitespace-nowrap text-teal-200">
+      {text}
+    </div>
+  );
 }
 
 export function WiggleSnakesGame() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [phase, setPhase] = useState<Phase>('menu');
-  // server and first client paint agree on the defaults; the saved values land right after
-  const savedSkin = useSyncExternalStore(noSubscribe, loadSkin, () => 0);
-  const savedBest = useSyncExternalStore(noSubscribe, loadBest, () => 0);
-  const [pickedSkin, setSkin] = useState<number | null>(null);
-  const [newBest, setBest] = useState<number | null>(null);
-  const skin = pickedSkin ?? savedSkin;
-  const best = newBest ?? savedBest;
-  const [hud, setHud] = useState<Hud | null>(null);
-  const [ending, setEnding] = useState<Ending | null>(null);
-  const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
-  const touch = useSyncExternalStore(noSubscribe, isTouch, () => false);
-
-  const onEvent = useCallback((event: WorldEvent) => {
-    if (event.type === 'munch') {
-      if (event.snake.isPlayer) playMunch();
-      return;
-    }
-    if (event.eater.isPlayer) {
-      playGobble();
-      setToast({ id: event.victim.id, text: `You gobbled ${event.victim.name}! 😋` });
-    }
-    if (event.victim.isPlayer) {
-      playOops();
-      const length = Math.round(event.victim.mass);
-      const record = length > loadBest();
-      const topLength = recordBest(length);
-      setBest(topLength);
-      setEnding({ by: event.eater.name, length, best: topLength, record });
-      setPhase('over');
-      trackEvent('game_over', { ...GAME, length: String(length) });
-    }
-  }, []);
-
-  const { worldRef, inputRef } = useArena(canvasRef, { onHud: (w) => setHud(readHud(w)), onEvent });
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 1800);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
-  const start = () => {
-    const world = worldRef.current;
-    if (!world) return;
-    unlockWiggleAudio();
-    const player = spawnPlayer(world, skin);
-    inputRef.current = { angle: player.angle, boosting: false, steerId: null };
-    setHud(readHud(world));
-    setEnding(null);
-    setPhase('play');
-    trackEvent('game_start', GAME);
-  };
-
-  const pressSuper = useCallback(() => {
-    const world = worldRef.current;
-    if (!world || !activateSuper(world)) return;
-    playSuper();
-    setHud(readHud(world));
-    trackEvent('super_power', GAME);
-  }, [worldRef]);
-
-  useEffect(() => {
-    if (phase !== 'play') return;
-    const onKey = (e: KeyboardEvent) => {
-      const down = e.type === 'keydown';
-      if (e.code === 'Space') inputRef.current.boosting = down;
-      else if (down && e.code === 'ArrowLeft') inputRef.current.angle -= 0.3;
-      else if (down && e.code === 'ArrowRight') inputRef.current.angle += 0.3;
-      else if (down && e.code === 'KeyS') pressSuper();
-      else return;
-      e.preventDefault();
-    };
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('keyup', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('keyup', onKey);
-    };
-  }, [phase, inputRef, pressSuper]);
+  const { canvasRef, inputRef, ...game } = useWiggleGame();
+  const { phase, hud, toast } = game;
+  const playing = phase === 'play' && !!hud?.player;
 
   /** The head sits mid-screen, so steering is just "point from the middle to the finger". */
   const steer = (e: PointerEvent<HTMLDivElement>) => {
@@ -154,22 +100,22 @@ export function WiggleSnakesGame() {
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-label="Snake arena" />
 
-      {phase === 'play' && hud && (
+      {playing && hud && (
         <>
           <SuperButton
             charge={hud.charge}
             active={hud.active}
             ready={hud.ready}
             left={hud.remaining}
-            onPress={pressSuper}
+            onPress={game.pressSuper}
           />
-          <Leaderboard board={hud.board} player={hud.player} />
+          <Leaderboard board={hud.board} />
           <LengthBadge
             length={hud.player?.length ?? 0}
             rank={hud.player?.rank ?? 0}
             total={hud.total}
           />
-          {touch && (
+          {game.touch && (
             <BoostButton
               onBoost={(on) => {
                 inputRef.current.boosting = on;
@@ -184,23 +130,11 @@ export function WiggleSnakesGame() {
               {toast.text}
             </div>
           )}
+          <FriendNote game={game} />
         </>
       )}
 
-      {phase === 'menu' && (
-        <MenuPanel
-          skin={skin}
-          best={best}
-          onSkin={(i) => {
-            setSkin(i);
-            saveSkin(i);
-          }}
-          onPlay={start}
-        />
-      )}
-      {phase === 'over' && ending && (
-        <GameOverPanel ending={ending} onPlay={start} onMenu={() => setPhase('menu')} />
-      )}
+      <Panel game={game} />
     </div>
   );
 }

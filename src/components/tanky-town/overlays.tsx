@@ -4,6 +4,8 @@ import { useState, type ReactNode } from 'react';
 
 import { LEVEL_COUNT } from '@/lib/tanky-town-level';
 
+import { shareLink } from '../duo/share-link';
+
 function Overlay({ children }: { children: ReactNode }) {
   return (
     <div className="absolute inset-0 flex touch-manipulation flex-col items-center justify-center gap-4 rounded-2xl bg-black/65 px-4 text-center backdrop-blur-[2px]">
@@ -64,16 +66,9 @@ export function MenuPanel({ invited, onSolo, onTogether }: MenuProps) {
   );
 }
 
-/** Shares the link with the phone's share sheet, or copies it where there is none. */
-async function shareLink(link: string) {
-  if (navigator.share) return navigator.share({ title: 'Tanky Town', url: link }).then(() => false);
-  await navigator.clipboard.writeText(link);
-  return true;
-}
-
 export function SharePanel({ link, onAlone }: { link: string; onAlone: () => void }) {
   const [copied, setCopied] = useState(false);
-  const share = () => void shareLink(link).then(setCopied, () => undefined);
+  const share = () => void shareLink('Tanky Town', link).then(setCopied, () => undefined);
   return (
     <Overlay>
       <span className="text-4xl">👫</span>
