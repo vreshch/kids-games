@@ -53,14 +53,16 @@ function Panel({ game }: { game: Lobby }) {
   return null;
 }
 
-/** A small note under the super button while the host plays on alone. */
-function FriendNote({ game }: { game: Lobby }) {
+/** A small note while the host plays on alone: under the super button, or on top of a panel. */
+function FriendNote({ game, playing }: { game: Lobby; playing: boolean }) {
   const { mode, duo } = game;
   if (mode !== 'host') return null;
   const text = duo.status === 'lost' ? '📡 Connecting...' : duo.peers < 2 ? '👋 Friend left' : null;
   if (!text) return null;
   return (
-    <div className="pointer-events-none absolute top-28 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1 text-sm font-semibold whitespace-nowrap text-teal-200">
+    <div
+      className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded-full ${playing ? 'top-28' : 'top-3'} bg-black/55 px-3 py-1 text-sm font-semibold whitespace-nowrap text-teal-200`}
+    >
       {text}
     </div>
   );
@@ -130,11 +132,11 @@ export function WiggleSnakesGame() {
               {toast.text}
             </div>
           )}
-          <FriendNote game={game} />
         </>
       )}
 
       <Panel game={game} />
+      <FriendNote game={game} playing={playing} />
     </div>
   );
 }

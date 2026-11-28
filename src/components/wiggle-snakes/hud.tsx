@@ -55,8 +55,8 @@ export function SuperButton({ charge, active, ready, left, onPress }: SuperProps
 export function Leaderboard({ board }: { board: Standing[] }) {
   const shown = board.slice(0, 5);
   return (
-    <ol className="pointer-events-none absolute top-3 right-3 w-32 rounded-xl bg-black/40 px-3 py-2 text-xs sm:w-44 sm:text-sm">
-      <li className="mb-1 text-[11px] font-semibold tracking-wide text-pink-200/80 uppercase">
+    <ol className="pointer-events-none absolute top-3 right-2 w-28 rounded-xl bg-black/40 px-3 py-2 text-xs sm:right-3 sm:w-44 sm:text-sm">
+      <li className="mb-1 text-[10px] font-semibold tracking-wide whitespace-nowrap text-pink-200/80 uppercase sm:text-[11px]">
         Biggest snakes
       </li>
       {shown.map((s) => (
