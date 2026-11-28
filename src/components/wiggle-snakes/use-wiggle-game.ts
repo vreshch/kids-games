@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { trackEvent } from '@/lib/analytics';
-import { newRoomId } from '@/lib/duo-room';
 import { speakHint } from '@/lib/speak';
 import { playSuper, unlockWiggleAudio } from '@/lib/wiggle-audio';
 import { activateSuper, superState } from '@/lib/wiggle-rules';
 import { loadSkin, saveSkin } from '@/lib/wiggle-skins';
 import { removePlayer, spawnPlayer, type World } from '@/lib/wiggle-world';
 
-import { roomInUrl } from '../duo/room';
+import { inviteInUrl, pickRoom } from '../duo/room';
 import { roomLink } from '../duo/share-link';
 import { readHud, spawnFriend, steer, stepLocal, type Hud } from './arena-step';
 import { isTouch, noSubscribe } from './browser-store';
@@ -33,7 +32,7 @@ export function useWiggleGame() {
   const [phase, phaseRef, setPhase] = useStateRef<Phase>('menu');
   // server and first client paint agree on the defaults; the saved values land right after
   const savedSkin = useSyncExternalStore(noSubscribe, loadSkin, () => 0);
-  const invited = useSyncExternalStore(noSubscribe, roomInUrl, () => null);
+  const invited = useSyncExternalStore(noSubscribe, inviteInUrl, () => null);
   const touch = useSyncExternalStore(noSubscribe, isTouch, () => false);
   const [pickedSkin, setSkin] = useState<number | null>(null);
   const skin = pickedSkin ?? savedSkin;
@@ -147,9 +146,9 @@ export function useWiggleGame() {
 
   const playTogether = () => {
     unlockWiggleAudio();
-    const room = invited ?? newRoomId();
+    const { room, seat } = pickRoom();
     history.replaceState(null, '', `?room=${room}`);
-    duo.join(room);
+    duo.join(room, seat);
   };
 
   const playAgain = () => {

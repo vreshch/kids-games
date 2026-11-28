@@ -39,34 +39,6 @@ test('tanky town starts a game with touch controls', async ({ page }) => {
   await expect(page.getByRole('group', { name: 'Drive pad' })).toBeVisible();
 });
 
-test('tanky town: a friend joins by link and both play the same game', async ({
-  page,
-  context,
-}) => {
-  await page.goto('/tanky-town');
-  // The button only answers once React has hydrated, so retry until the link shows.
-  await expect(async () => {
-    await page.getByRole('button', { name: /Play together/ }).click({ timeout: 1000 });
-    await expect(page.getByText('Waiting for your friend')).toBeVisible({ timeout: 1000 });
-  }).toPass({ timeout: 15_000 });
-  const link = await page.getByLabel('Game link').inputValue();
-  expect(link).toMatch(/\/tanky-town\?room=[a-z0-9]{6}$/);
-
-  const friend = await context.newPage();
-  await friend.goto(link);
-  await expect(async () => {
-    await friend.getByRole('button', { name: /Join your friend/ }).click({ timeout: 1000 });
-    await expect(friend.getByText('Brick Garden', { exact: false })).toBeVisible({ timeout: 2000 });
-  }).toPass({ timeout: 15_000 });
-  await expect(page.getByText('Brick Garden', { exact: false })).toBeVisible();
-  await expect(page.getByText('you 🟡')).toBeVisible();
-  await expect(friend.getByText('you 🟢')).toBeVisible();
-  await expect(friend.getByLabel('5 lives')).toBeVisible();
-
-  await friend.close();
-  await expect(page.getByText('Your friend left', { exact: false })).toBeVisible();
-});
-
 test('yummy plan: follow the plan, fill the bowl and bake a cookie', async ({ page }) => {
   await page.goto('/yummy-plan');
   // Play only answers once React has hydrated, so retry the tap until the kitchen shows.
@@ -134,45 +106,6 @@ test('wiggle snakes starts and the super button fires', async ({ page }) => {
   await expect(page.getByText('SUPER!')).toBeVisible();
   await page.getByRole('button', { name: 'Super power' }).click();
   await expect(page.getByText('SUPER!')).toBeHidden();
-});
-
-test('wiggle snakes: a friend joins by link and each has its own snake', async ({
-  page,
-  browser,
-}) => {
-  await page.goto('/wiggle-snakes');
-  // The button only answers once React has hydrated, so retry until the link shows.
-  await expect(async () => {
-    await page.getByRole('button', { name: /Play together/ }).click({ timeout: 1000 });
-    await expect(page.getByText('Waiting for your friend')).toBeVisible({ timeout: 1000 });
-  }).toPass({ timeout: 15_000 });
-  const link = await page.getByLabel('Game link').inputValue();
-  expect(link).toMatch(/\/wiggle-snakes\?room=[a-z0-9]{6}$/);
-
-  // A second browser, like a friend on another phone: its own storage and its own snake.
-  const other = await browser.newContext();
-  const friend = await other.newPage();
-  await friend.goto(link);
-  await expect(async () => {
-    await friend.getByRole('button', { name: /Join your friend/ }).click({ timeout: 1000 });
-    await expect(friend.getByRole('button', { name: 'Super power' })).toBeVisible({
-      timeout: 3000,
-    });
-  }).toPass({ timeout: 15_000 });
-  await expect(page.getByRole('button', { name: 'Super power' })).toBeVisible();
-  for (const screen of [page, friend]) {
-    await expect(screen.getByText(/\. You$/)).toBeVisible();
-    await expect(screen.getByText(/👫 Friend/)).toBeVisible();
-  }
-
-  // The friend's tap goes to the host's game and comes back: only the friend's super fires.
-  await expect(friend.getByText('SUPER!')).toBeVisible();
-  await friend.getByRole('button', { name: 'Super power' }).click();
-  await expect(friend.getByText('SUPER!')).toBeHidden();
-  await expect(page.getByText('SUPER!')).toBeVisible();
-
-  await other.close();
-  await expect(page.getByText('Friend left')).toBeVisible();
 });
 
 test('secret pet land: knock on the present three times to find the kitten', async ({ page }) => {

@@ -28,10 +28,11 @@ function Panel({ game }: { game: Lobby }) {
         onTogether={game.playTogether}
       />
     );
-  if (mode === 'idle' && game.invited && duo.seat < 0)
+  const waiting = duo.status !== 'open' || duo.peers < 2;
+  if ((mode === 'idle' && game.invited) || (mode === 'guest' && waiting && !hud?.player))
     return <NoticePanel icon="🚀" title="Joining your friend..." action={alone} />;
   if (mode === 'idle') return <SharePanel link={game.link} onAlone={game.playSolo} />;
-  if (mode === 'guest' && (duo.status !== 'open' || duo.peers < 2))
+  if (mode === 'guest' && waiting)
     return (
       <NoticePanel
         icon="👋"

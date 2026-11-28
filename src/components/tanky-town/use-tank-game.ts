@@ -4,11 +4,10 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { trackEvent } from '@/lib/analytics';
 import * as audio from '@/lib/tanky-town-audio';
-import { newRoomId } from '@/lib/duo-room';
 import type { Input, TankEvent, World } from '@/lib/tanky-town-state';
 import { createWorld, step } from '@/lib/tanky-town-world';
 
-import { roomInUrl } from '../duo/room';
+import { inviteInUrl, pickRoom } from '../duo/room';
 import { roomLink } from '../duo/share-link';
 import { useDuo } from './use-duo';
 import { useKeyboard } from './use-keyboard';
@@ -49,7 +48,7 @@ export function useTankGame() {
   const modeRef = useRef<Mode>('idle');
   const [mode, setMode] = useState<Mode>('idle');
   const [view, setView] = useState<View | null>(null);
-  const invited = useSyncExternalStore(noSubscribe, roomInUrl, () => null);
+  const invited = useSyncExternalStore(noSubscribe, inviteInUrl, () => null);
 
   const sync = (world: World) =>
     setView((prev) => {
@@ -104,9 +103,9 @@ export function useTankGame() {
   };
   const playTogether = () => {
     audio.unlockTankAudio();
-    const room = invited ?? newRoomId();
+    const { room, seat } = pickRoom();
     history.replaceState(null, '', `?room=${room}`);
-    duo.join(room);
+    duo.join(room, seat);
   };
   /** After a loss the same level starts again with a fresh score; after a win, level one. */
   const retryLevel = () => (worldRef.current?.phase === 'over' ? worldRef.current.levelIndex : 0);

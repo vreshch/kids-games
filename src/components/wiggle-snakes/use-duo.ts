@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 
+import type { Seat } from '@/lib/duo-room';
 import {
   applySnapshot,
   coast,
@@ -65,9 +66,9 @@ export function useDuo(options: Options) {
     },
   });
 
-  const join = (id: string) => {
+  const join = (id: string, seat: Seat) => {
     net.current = fresh();
-    room.join(id);
+    room.join(id, seat);
   };
   const leave = () => {
     net.current = fresh();

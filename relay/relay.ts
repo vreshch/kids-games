@@ -5,13 +5,14 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer, type WebSocket } from 'ws';
 
 const ROOM_PATH = /^\/relay\/([a-z0-9]{4,12})$/;
+const SEAT_PARAM = /^[01]$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_ROOMS = 500;
 const MAX_PAYLOAD = 64 * 1024;
 const SWEEP_MS = 25_000;
 
 /** Why the relay closed a socket; the game shows a message for each. */
-export const CLOSE = { full: 4001, expired: 4002, busy: 4003 } as const;
+export const CLOSE = { full: 4001, expired: 4002, busy: 4003, replaced: 4004 } as const;
 
 export type RelayOptions = {
   /** Allowed `Origin` headers; `*` allows any. */
@@ -57,11 +58,18 @@ export function createRelay(options: RelayOptions) {
     return room;
   }
 
-  function join(ws: WebSocket, id: string) {
+  /** A claimed seat is taken over, so a player coming back gets its own seat again. */
+  function seatFor(room: Room, claim: number | null) {
+    if (claim === null) return room.seats.indexOf(null);
+    room.seats[claim]?.close(CLOSE.replaced, 'seat taken over');
+    return claim;
+  }
+
+  function join(ws: WebSocket, id: string, claim: number | null) {
     ws.on('error', () => ws.terminate());
     const room = openRoom(id);
     if (!room) return ws.close(CLOSE.busy, 'relay busy');
-    const seat = room.seats.indexOf(null);
+    const seat = seatFor(room, claim);
     if (seat < 0) return ws.close(CLOSE.full, 'room full');
     room.seats[seat] = ws;
     alive.add(ws);
@@ -108,11 +116,14 @@ export function createRelay(options: RelayOptions) {
     socket.end(`HTTP/1.1 ${status}\r\nConnection: close\r\n\r\n`);
 
   server.on('upgrade', (req, socket, head) => {
-    const id = ROOM_PATH.exec(req.url ?? '')?.[1];
+    const url = new URL(req.url ?? '/', 'http://relay');
+    const id = ROOM_PATH.exec(url.pathname)?.[1];
+    const seat = url.searchParams.get('seat') ?? '';
+    const claim = SEAT_PARAM.test(seat) ? Number(seat) : null;
     const origin = req.headers.origin ?? '';
     if (!id) return refuse(socket, '404 Not Found');
     if (!origins.includes('*') && !origins.includes(origin)) return refuse(socket, '403 Forbidden');
-    wss.handleUpgrade(req, socket, head, (ws) => join(ws, id));
+    wss.handleUpgrade(req, socket, head, (ws) => join(ws, id, claim));
   });
 
   const timer = setInterval(sweep, SWEEP_MS);

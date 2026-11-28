@@ -1,8 +1,10 @@
-import { isRoomId } from '@/lib/duo-room';
+import { inviteOf, isRoomId, roomToPlay, saveSeat, type Seat } from '@/lib/duo-room';
 
 const CLOSE_FULL = 4001;
 const CLOSE_EXPIRED = 4002;
+const CLOSE_REPLACED = 4004;
 const RETRY_MS = 2000;
+const CONNECT_MS = 5000;
 
 export type Drop = 'lost' | 'full' | 'expired';
 export type Room<M> = { send: (message: M) => void; close: () => void };
@@ -30,11 +32,39 @@ export function roomInUrl() {
   return isRoomId(room) ? room : null;
 }
 
-const dropOf = (code: number): Drop =>
-  code === CLOSE_FULL ? 'full' : code === CLOSE_EXPIRED ? 'expired' : 'lost';
+const tabStore = () => {
+  try {
+    return sessionStorage;
+  } catch {
+    return null;
+  }
+};
 
-/** One relay room. A lost connection is dialled again until `close` is called. */
-export function openRoom<M extends { t: string }>(id: string, handlers: Handlers<M>): Room<M> {
+/** The invite link's room, unless this tab created it (then it is the host's own link). */
+export const inviteInUrl = () => inviteOf(roomInUrl(), tabStore());
+
+/** The room and seat for "Play together"; a new room is remembered as this tab's own. */
+export const pickRoom = () => roomToPlay(roomInUrl(), tabStore());
+
+export const rememberSeat = (room: string, seat: Seat) => saveSeat(tabStore(), room, seat);
+
+/** A seat taken over by someone else (a second friend on the same link) stops like a full room. */
+const dropOf = (code: number): Drop =>
+  code === CLOSE_FULL || code === CLOSE_REPLACED
+    ? 'full'
+    : code === CLOSE_EXPIRED
+      ? 'expired'
+      : 'lost';
+
+/**
+ * One relay room, sitting in `seat` every time. A lost connection is dialled again until
+ * `close`, and a dial that hangs is given up after a few seconds.
+ */
+export function openRoom<M extends { t: string }>(
+  id: string,
+  seat: Seat,
+  handlers: Handlers<M>
+): Room<M> {
   let ws: WebSocket | null = null;
   let retry: ReturnType<typeof setTimeout> | undefined;
   let closed = false;
@@ -47,10 +77,14 @@ export function openRoom<M extends { t: string }>(id: string, handlers: Handlers
     else handlers.onMessage(message as unknown as M);
   };
   const dial = () => {
-    ws = new WebSocket(relayUrl(id));
-    ws.onmessage = (e) => hear(String(e.data));
-    ws.onclose = (e) => {
-      if (closed) return;
+    const socket = new WebSocket(`${relayUrl(id)}?seat=${seat}`);
+    const hung = setTimeout(() => socket.close(), CONNECT_MS);
+    ws = socket;
+    socket.onopen = () => clearTimeout(hung);
+    socket.onmessage = (e) => hear(String(e.data));
+    socket.onclose = (e) => {
+      clearTimeout(hung);
+      if (closed || ws !== socket) return;
       const why = dropOf(e.code);
       handlers.onDrop(why);
       if (why === 'lost') retry = setTimeout(dial, RETRY_MS);
