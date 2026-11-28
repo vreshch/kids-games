@@ -60,6 +60,23 @@ describe('two players', () => {
     expect(friendOf(world, 0)).toBe(friend);
   });
 
+  it('never spawns a player on top of a bot', () => {
+    for (let seed = 1; seed < 30; seed++) {
+      const world = createWorld(8, seeded(seed));
+      run(world, 3);
+      const host = spawnPlayer(world, 0, 0);
+      const friend = spawnPlayer(world, 1, 1);
+      for (const player of [host, friend]) {
+        const head = player.body[0];
+        const bots = world.snakes.filter((s) => s.seat === null && s.alive);
+        const closest = Math.min(
+          ...bots.flatMap((b) => b.body.map((p) => Math.hypot(p.x - head.x, p.y - head.y)))
+        );
+        expect(closest).toBeGreaterThan(150);
+      }
+    }
+  });
+
   it('never gives the friend the same colours', () => {
     const world = createWorld(8, seeded());
     spawnPlayer(world, 3, 0);
@@ -219,6 +236,8 @@ describe('snapshots', () => {
     const box = { x: 0, y: 0, w: 100, h: 100 };
     const merged = mergeSnapshots(snapshot(world, box, [mine]), snapshot(world, box, [theirs]));
     expect(merged.events).toEqual([mine, theirs]);
+    const late = mergeSnapshots(merged, snapshot(world, box, []));
+    expect(late.events).toEqual([mine]);
     expect(mergeSnapshots(null, merged)).toBe(merged);
   });
 });

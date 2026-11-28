@@ -29,7 +29,7 @@ function Panel({ game }: { game: Lobby }) {
       />
     );
   if (mode === 'idle' && game.invited && duo.seat < 0)
-    return <NoticePanel icon="🚀" title="Joining your friend..." />;
+    return <NoticePanel icon="🚀" title="Joining your friend..." action={alone} />;
   if (mode === 'idle') return <SharePanel link={game.link} onAlone={game.playSolo} />;
   if (mode === 'guest' && (duo.status !== 'open' || duo.peers < 2))
     return (

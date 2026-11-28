@@ -10,6 +10,7 @@ const BOOST_COST = 8;
 const DROP_EVERY = 0.12;
 const SAFE_SPAWN = 700;
 const FRIEND_NEAR = 250;
+const BODY_CLEAR = 250;
 export const PLAYER_NAMES = ['You', 'Friend'];
 
 export type WorldEvent =
@@ -63,13 +64,22 @@ function randomSpot(world: World, spread: number, near?: Snake): Vec {
   return out > 1 ? { x: spot.x / out, y: spot.y / out } : spot;
 }
 
-/** A spot no hungry head is close to, so nobody spawns inside a mouth; friends do not count. */
+/** Far from every hungry head and clear of every body, so nobody spawns inside a mouth. */
+function isClear(spot: Vec, others: Snake[]) {
+  return others.every(
+    (o) =>
+      Math.hypot(o.body[0].x - spot.x, o.body[0].y - spot.y) > SAFE_SPAWN &&
+      o.body.every((p, i) => i % 4 !== 0 || Math.hypot(p.x - spot.x, p.y - spot.y) > BODY_CLEAR)
+  );
+}
+
+/** A clear spot; near the friend when there is one. Friends do not count as danger. */
 function safeSpot(world: World, spread: number, near?: Snake): Vec {
-  const heads = world.snakes.filter((s) => s.alive && s !== near).map((s) => s.body[0]);
+  const others = world.snakes.filter((s) => s.alive && (!near || s.seat === null));
   let spot: Vec = { x: 0, y: 0 };
-  for (let tries = 0; tries < 25; tries++) {
-    spot = randomSpot(world, spread, tries < 15 ? near : undefined);
-    if (heads.every((h) => Math.hypot(h.x - spot.x, h.y - spot.y) > SAFE_SPAWN)) break;
+  for (let tries = 0; tries < 40; tries++) {
+    spot = randomSpot(world, spread, tries < 20 ? near : undefined);
+    if (isClear(spot, others)) break;
   }
   return spot;
 }

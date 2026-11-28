@@ -1,9 +1,8 @@
 import { foodRadius, type Food } from './wiggle-food';
+import { packBody, STRIDE, unpackBody } from './wiggle-net-body';
 import { createSnake, moveSnake, radiusFor, type Snake, type Vec } from './wiggle-snake';
 import type { World, WorldEvent } from './wiggle-world';
 
-/** Every third body point goes over the wire; the friend fills in the ones between. */
-const STRIDE = 3;
 /** Extra room around the friend's view, so a snake never pops in at the edge. */
 const MARGIN = 300;
 const TAU = Math.PI * 2;
@@ -68,52 +67,6 @@ const round = (value: number, k: number) => Math.round(value * k) / k;
 
 function inBox(p: Vec, box: ViewBox, pad: number) {
   return Math.abs(p.x - box.x) < box.w + pad && Math.abs(p.y - box.y) < box.h + pad;
-}
-
-function packBody(body: Vec[]) {
-  const out: number[] = [];
-  let px = 0;
-  let py = 0;
-  for (const i of sampleIndices(body.length)) {
-    const x = Math.round(body[i].x);
-    const y = Math.round(body[i].y);
-    out.push(x - px, y - py);
-    px = x;
-    py = y;
-  }
-  return out;
-}
-
-/** The sampled indices: 0, STRIDE, 2 x STRIDE, ... and always the tail. */
-function sampleIndices(length: number) {
-  const out: number[] = [];
-  for (let i = 0; i < length - 1; i += STRIDE) out.push(i);
-  out.push(length - 1);
-  return out;
-}
-
-function unpackBody(p: number[], length: number): Vec[] {
-  const points: Vec[] = [];
-  let x = 0;
-  let y = 0;
-  for (let i = 0; i < p.length; i += 2) {
-    x += p[i];
-    y += p[i + 1];
-    points.push({ x, y });
-  }
-  if (length <= 1) return points;
-  const at = sampleIndices(length);
-  const body: Vec[] = [];
-  for (let k = 0; k < at.length - 1; k++) {
-    const a = points[k];
-    const b = points[k + 1] ?? a;
-    const span = at[k + 1] - at[k];
-    for (let j = 0; j < span; j++) {
-      body.push({ x: a.x + ((b.x - a.x) * j) / span, y: a.y + ((b.y - a.y) * j) / span });
-    }
-  }
-  body.push(points[at.length - 1] ?? body[body.length - 1]);
-  return body;
 }
 
 function wireSnake(snake: Snake, box: ViewBox): WireSnake {
@@ -206,7 +159,9 @@ export function coast(world: World, dt: number) {
   }
 }
 
-/** Two snapshots that arrive in one frame: keep the newest picture and every event. */
+/** Snapshots that pile up (a slow frame, a hidden tab): newest picture, old munches dropped. */
 export function mergeSnapshots(older: Snapshot | null, newer: Snapshot): Snapshot {
-  return older ? { ...newer, events: [...older.events, ...newer.events] } : newer;
+  if (!older) return newer;
+  const kept = older.events.filter((e) => e.type === 'gobble');
+  return { ...newer, events: [...kept, ...newer.events] };
 }
