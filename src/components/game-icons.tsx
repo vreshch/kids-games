@@ -192,3 +192,18 @@ export function CookieIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function DollhouseIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <polygon points="24,3 45,19 3,19" fill="#dc2626" />
+      <rect x={5} y={19} width={38} height={26} rx={2} fill="#a16207" />
+      <rect x={7} y={21} width={14} height={11} fill="#fde68a" />
+      <rect x={27} y={21} width={14} height={11} fill="#bae6fd" />
+      <rect x={7} y={34} width={14} height={9} fill="#bbf7d0" />
+      <rect x={27} y={34} width={14} height={9} fill="#fbcfe8" />
+      <rect x={21} y={21} width={6} height={22} fill="#64748b" />
+      <circle cx={14} cy={38} r={2.5} fill="#2563eb" />
+    </svg>
+  );
+}

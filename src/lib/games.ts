@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import {
   CookieIcon,
   CrystalIcon,
+  DollhouseIcon,
   FrankieIcon,
   MunchIcon,
   ParrotIcon,
@@ -93,6 +94,14 @@ export const GAMES: Game[] = [
     tagline: 'Tap the plan, fill the bowl, bake cookies and more. Find the secret recipe!',
     accent: '#f472b6',
     Icon: CookieIcon,
+  },
+  {
+    slug: 'daddy-dollhouse',
+    title: 'Daddy Dollhouse',
+    tagline:
+      'Send daddy, the girl, the baby and the cat around the house, ride the elevator, find 3 secrets.',
+    accent: '#fbbf24',
+    Icon: DollhouseIcon,
   },
 ];
 
