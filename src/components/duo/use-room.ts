@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { openRoom, type Drop, type Room } from './room';
+import type { Seat } from '@/lib/duo-room';
+
+import { openRoom, rememberSeat, type Drop, type Room } from './room';
 
 export type DuoStatus = 'off' | 'connecting' | 'open' | Drop;
 type Handlers<M> = {
@@ -35,12 +37,14 @@ export function useRoom<M extends { t: string }>(handlers: Handlers<M>) {
     setRoomId(null);
   };
 
-  const join = (id: string) => {
+  /** Sits in `claim` (0 hosts, 1 joins) and keeps that seat through reconnects. */
+  const join = (id: string, claim: Seat) => {
     leave();
     const n = live.current;
+    rememberSeat(id, claim);
     setRoomId(id);
     setStatus('connecting');
-    n.room = openRoom<M>(id, {
+    n.room = openRoom<M>(id, claim, {
       onSeat: (mine) => {
         n.seat = mine;
         setSeat(mine);

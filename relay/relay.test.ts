@@ -95,6 +95,33 @@ describe('relay', () => {
     expect(await connect().next()).toEqual({ t: 'seat', seat: 1 });
   });
 
+  it('gives each player the seat it claims, whoever comes back first after a restart', async () => {
+    await start();
+    const guest = connect('/relay/room1?seat=1');
+    expect(await guest.next()).toEqual({ t: 'seat', seat: 1 });
+    expect(await guest.next()).toEqual({ t: 'peers', count: 1 });
+    const host = connect('/relay/room1?seat=0');
+    expect(await host.next()).toEqual({ t: 'seat', seat: 0 });
+    expect(await host.next()).toEqual({ t: 'peers', count: 2 });
+    expect(await guest.next()).toEqual({ t: 'peers', count: 2 });
+  });
+
+  it('hands a claimed seat to the newcomer and tells the old socket why it went', async () => {
+    await start();
+    const stale = connect('/relay/room1?seat=0');
+    await stale.next();
+    const back = connect('/relay/room1?seat=0');
+    expect(await back.next()).toEqual({ t: 'seat', seat: 0 });
+    expect(await back.next()).toEqual({ t: 'peers', count: 1 });
+    expect(await stale.closed).toBe(CLOSE.replaced);
+    expect(await connect().next()).toEqual({ t: 'seat', seat: 1 });
+  });
+
+  it('ignores a seat claim it does not know', async () => {
+    await start();
+    expect(await connect('/relay/room1?seat=7').next()).toEqual({ t: 'seat', seat: 0 });
+  });
+
   it('refuses a wrong origin and a bad room name', async () => {
     await start();
     expect(await connect('/relay/room1', 'https://evil.example').closed).toBe(-1);

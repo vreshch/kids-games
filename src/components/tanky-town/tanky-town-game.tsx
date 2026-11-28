@@ -22,6 +22,8 @@ function Panel({ game }: { game: Lobby }) {
     return (
       <MenuPanel invited={!!game.invited} onSolo={game.playSolo} onTogether={game.playTogether} />
     );
+  if (mode === 'idle' && game.invited)
+    return <NoticePanel icon="🚀" title="Joining your friend..." action={alone} />;
   if (mode === 'idle') return <SharePanel link={game.link} onAlone={game.playSolo} />;
   if (mode === 'guest' && !view) return <NoticePanel icon="🚀" title="Joining your friend..." />;
   if (mode === 'guest' && (duo.status !== 'open' || duo.peers < 2))
