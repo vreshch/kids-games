@@ -52,17 +52,21 @@ export function SuperButton({ charge, active, ready, left, onPress }: SuperProps
   );
 }
 
-export function Leaderboard({ board, player }: { board: Standing[]; player?: Standing }) {
+export function Leaderboard({ board }: { board: Standing[] }) {
   const shown = board.slice(0, 5);
   return (
-    <ol className="pointer-events-none absolute top-3 right-3 w-32 rounded-xl bg-black/40 px-3 py-2 text-xs sm:w-44 sm:text-sm">
-      <li className="mb-1 text-[11px] font-semibold tracking-wide text-pink-200/80 uppercase">
+    <ol className="pointer-events-none absolute top-3 right-2 w-28 rounded-xl bg-black/40 px-3 py-2 text-xs sm:right-3 sm:w-44 sm:text-sm">
+      <li className="mb-1 text-[10px] font-semibold tracking-wide whitespace-nowrap text-pink-200/80 uppercase sm:text-[11px]">
         Biggest snakes
       </li>
       {shown.map((s) => (
         <Row key={s.rank} standing={s} />
       ))}
-      {player && player.rank > shown.length && <Row standing={player} />}
+      {board
+        .filter((s) => (s.isPlayer || s.isFriend) && s.rank > shown.length)
+        .map((s) => (
+          <Row key={s.rank} standing={s} />
+        ))}
     </ol>
   );
 }
@@ -70,10 +74,11 @@ export function Leaderboard({ board, player }: { board: Standing[]; player?: Sta
 function Row({ standing }: { standing: Standing }) {
   return (
     <li
-      className={`flex justify-between gap-2 ${standing.isPlayer ? 'font-bold text-amber-300' : 'text-white/80'}`}
+      className={`flex justify-between gap-2 ${standing.isPlayer ? 'font-bold text-amber-300' : standing.isFriend ? 'font-bold text-teal-300' : 'text-white/80'}`}
     >
       <span className="truncate">
-        {standing.rank}. {standing.name}
+        {standing.rank}. {standing.isFriend ? '👫 ' : ''}
+        {standing.name}
       </span>
       <span className="tabular-nums">{standing.length}</span>
     </li>
@@ -137,7 +142,7 @@ export function SkinPicker({
   onChange: (index: number) => void;
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2.5">
+    <div className="short:grid-cols-8 grid grid-cols-4 gap-2.5">
       {SKINS.map((s, i) => (
         <button
           key={s.id}

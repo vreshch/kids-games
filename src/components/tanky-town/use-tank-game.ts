@@ -4,10 +4,12 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { trackEvent } from '@/lib/analytics';
 import * as audio from '@/lib/tanky-town-audio';
-import { isRoomId, newRoomId } from '@/lib/tanky-town-net';
+import { newRoomId } from '@/lib/duo-room';
 import type { Input, TankEvent, World } from '@/lib/tanky-town-state';
 import { createWorld, step } from '@/lib/tanky-town-world';
 
+import { roomInUrl } from '../duo/room';
+import { roomLink } from '../duo/share-link';
 import { useDuo } from './use-duo';
 import { useKeyboard } from './use-keyboard';
 import { useTankLoop } from './use-tank-loop';
@@ -30,10 +32,6 @@ const SOUNDS: Partial<Record<TankEvent['type'], () => void>> = {
 const QUIET = new Set<TankEvent['type']>(['shot', 'brick', 'clang']);
 
 const noSubscribe = () => () => undefined;
-function roomInUrl() {
-  const room = new URLSearchParams(location.search).get('room');
-  return isRoomId(room) ? room : null;
-}
 
 function report(event: TankEvent, world: World) {
   if (event.type !== 'over' && event.type !== 'won') return;
@@ -113,7 +111,7 @@ export function useTankGame() {
   /** After a loss the same level starts again with a fresh score; after a win, level one. */
   const retryLevel = () => (worldRef.current?.phase === 'over' ? worldRef.current.levelIndex : 0);
   const playAgain = () => (mode === 'guest' ? duo.askAgain() : begin(mode, retryLevel()));
-  const link = duo.roomId ? `${location.origin}${location.pathname}?room=${duo.roomId}` : '';
+  const link = roomLink(duo.roomId);
 
   return { canvasRef, inputRef, mode, view, duo, invited, link, playSolo, playTogether, playAgain };
 }

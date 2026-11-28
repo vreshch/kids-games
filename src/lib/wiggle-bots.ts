@@ -24,8 +24,8 @@ export type BotSurroundings = {
   snakes: Snake[];
   foods: Food[];
   arenaRadius: number;
-  /** The player while the super button is glowing - every bot runs from it. */
-  superSnake: Snake | null;
+  /** The players whose super button is glowing - every bot runs from the closest. */
+  superSnakes: Snake[];
   rand: () => number;
 };
 
@@ -49,7 +49,7 @@ export function thinkBot(bot: Snake, world: BotSurroundings, dt: number) {
     bot.targetAngle = Math.atan2(-head.y, -head.x);
     return;
   }
-  const hero = world.superSnake?.body[0];
+  const hero = closestHead(head, world.superSnakes);
   if (hero && Math.hypot(hero.x - head.x, hero.y - head.y) < FLEE_RANGE) {
     bot.targetAngle = angleTo(hero, head);
     bot.boosting = bot.mass > MIN_BOOST_MASS * 2;
@@ -73,6 +73,19 @@ export function thinkBot(bot: Snake, world: BotSurroundings, dt: number) {
   }
   bot.wander += (world.rand() - 0.5) * 0.9;
   bot.targetAngle = bot.wander;
+}
+
+function closestHead(from: Vec, snakes: Snake[]) {
+  let best: Vec | null = null;
+  for (const snake of snakes) {
+    const head = snake.body[0];
+    if (
+      !best ||
+      Math.hypot(head.x - from.x, head.y - from.y) < Math.hypot(best.x - from.x, best.y - from.y)
+    )
+      best = head;
+  }
+  return best;
 }
 
 /** Closest body point of any snake big enough to gobble this bot, if it is too close. */

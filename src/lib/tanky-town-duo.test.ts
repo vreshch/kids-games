@@ -2,15 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { damage } from './tanky-town-bullets';
 import { LEVEL_COUNT, parseLevel } from './tanky-town-level';
-import {
-  applySnapshot,
-  coast,
-  isRoomId,
-  newRoomId,
-  sameInput,
-  snapshot,
-  type Snapshot,
-} from './tanky-town-net';
+import { applySnapshot, coast, sameInput, snapshot, type Snapshot } from './tanky-town-net';
 import { addTank, playerTank, tankPos, type Input, type World } from './tanky-town-state';
 import { createWorld, step } from './tanky-town-world';
 
@@ -143,14 +135,7 @@ describe('snapshots', () => {
   });
 });
 
-describe('rooms', () => {
-  it('makes room names the relay accepts', () => {
-    expect(newRoomId(fixed(0))).toBe('aaaaaa');
-    expect(isRoomId(newRoomId())).toBe(true);
-    expect(isRoomId('AB')).toBe(false);
-    expect(isRoomId(null)).toBe(false);
-  });
-
+describe('input', () => {
   it('tells when the input changed', () => {
     expect(sameInput(IDLE, { dir: null, fire: false })).toBe(true);
     expect(sameInput(IDLE, { dir: 1, fire: false })).toBe(false);

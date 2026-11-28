@@ -90,7 +90,7 @@ describe("Alisa's rule", () => {
   it('plays out in the world: a little bot bumping a big player gets gobbled', () => {
     const world = emptyWorld();
     const player = snake(300, 0, 0, 0, true);
-    world.player = player;
+    world.players[0] = player;
     const bot = snake(20, player.body[25].x, player.body[25].y + 5, Math.PI / 2);
     world.snakes = [player, bot];
     stepWorld(world, 1 / 60);
@@ -116,7 +116,7 @@ describe('super button', () => {
     const player = snake(20, -20, -60, 0, true);
     const giant = snake(400, 0, 0, Math.PI / 2);
     world.snakes = [player, giant];
-    world.player = player;
+    world.players[0] = player;
     return { world, player, giant };
   }
 
@@ -146,7 +146,7 @@ describe('super button', () => {
     expect(charging.ready).toBe(false);
     expect(charging.charge).toBeGreaterThan(0);
     expect(charging.charge).toBeLessThan(1);
-    world.time = world.superReadyAt;
+    world.time = world.superReadyAt[0];
     expect(superState(world)).toMatchObject({ ready: true, charge: 1 });
   });
 
@@ -163,7 +163,7 @@ describe('stepWorld', () => {
     const player = snake(100, 0, 0, 0, true);
     player.boosting = true;
     world.snakes = [player];
-    world.player = player;
+    world.players[0] = player;
     for (let i = 0; i < 30; i++) stepWorld(world, 1 / 60);
     expect(player.mass).toBeLessThan(100);
     expect(world.foods.some((f) => Math.abs(f.value - 0.72) < 1e-9)).toBe(true);

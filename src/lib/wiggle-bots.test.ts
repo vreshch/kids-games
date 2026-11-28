@@ -12,7 +12,7 @@ const around = (over: Partial<BotSurroundings>): BotSurroundings => ({
   snakes: [],
   foods: [],
   arenaRadius: 3000,
-  superSnake: null,
+  superSnakes: [],
   rand: () => 0.5,
   ...over,
 });
@@ -27,9 +27,17 @@ describe('thinkBot', () => {
   it('runs and zooms away from the super player', () => {
     const bot = snake(80, 200, 0);
     const hero = snake(20, 0, 0, true);
-    thinkBot(bot, around({ snakes: [bot, hero], superSnake: hero }), 1);
+    thinkBot(bot, around({ snakes: [bot, hero], superSnakes: [hero] }), 1);
     expect(bot.targetAngle).toBeCloseTo(0);
     expect(bot.boosting).toBe(true);
+  });
+
+  it('runs from the closer of two super players', () => {
+    const bot = snake(80, 200, 0);
+    const far = snake(20, 600, 0, true);
+    const near = snake(20, 0, 0, true);
+    thinkBot(bot, around({ snakes: [bot, far, near], superSnakes: [far, near] }), 1);
+    expect(bot.targetAngle).toBeCloseTo(0);
   });
 
   it('steers away from a bigger snake right next to it', () => {

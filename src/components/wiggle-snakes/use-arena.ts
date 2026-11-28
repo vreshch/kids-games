@@ -2,16 +2,26 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 
+import type { NetEvent, ViewBox } from '@/lib/wiggle-net';
 import { radiusFor } from '@/lib/wiggle-snake';
 import { SKINS } from '@/lib/wiggle-skins';
-import { createWorld, stepWorld, type World, type WorldEvent } from '@/lib/wiggle-world';
+import { createWorld, type World } from '@/lib/wiggle-world';
 
 import { createAssets, drawFrame, type Camera, type Screen } from './render';
 
 export type ArenaInput = { angle: number; boosting: boolean; steerId: number | null };
-type Callbacks = { onHud: (world: World) => void; onEvent: (event: WorldEvent) => void };
+type Callbacks = {
+  /** Moves the world on by one frame (a local step or the host's snapshot); returns what happened. */
+  advance: (world: World, dt: number, view: ViewBox) => NetEvent[];
+  onEvent: (event: NetEvent) => void;
+  onHud: (world: World) => void;
+  /** This browser's seat: the camera follows that snake. */
+  me: () => number;
+};
 
 const HUD_EVERY_MS = 200;
+
+export const freshWorld = () => createWorld(SKINS.length);
 
 /** Owns the world and the animation loop; React only hears about it a few times a second. */
 export function useArena(canvasRef: RefObject<HTMLCanvasElement | null>, callbacks: Callbacks) {
@@ -27,8 +37,7 @@ export function useArena(canvasRef: RefObject<HTMLCanvasElement | null>, callbac
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
-    const world = createWorld(SKINS.length);
-    worldRef.current = world;
+    worldRef.current ??= freshWorld();
     const assets = createAssets(ctx);
     const cam: Camera = { x: 0, y: 0, zoom: 0.5 };
     const screen: Screen = { w: 1, h: 1, dpr: 1 };
@@ -50,21 +59,16 @@ export function useArena(canvasRef: RefObject<HTMLCanvasElement | null>, callbac
     let hudAt = 0;
     let raf = 0;
     const frame = (now: number) => {
+      const world = worldRef.current!;
+      const { advance, onEvent, onHud, me } = callbacksRef.current;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      const { player } = world;
-      if (player?.alive) {
-        player.targetAngle = inputRef.current.angle;
-        player.boosting = inputRef.current.boosting;
-      }
-      stepWorld(world, dt);
-      for (const event of world.events) callbacksRef.current.onEvent(event);
-      world.events.length = 0;
-      followCamera(cam, world, screen, dt);
-      drawFrame(ctx, world, cam, screen, assets);
+      for (const event of advance(world, dt, viewOf(cam, screen))) onEvent(event);
+      followCamera(cam, world, screen, dt, me());
+      drawFrame(ctx, world, cam, screen, assets, me());
       if (now - hudAt > HUD_EVERY_MS) {
         hudAt = now;
-        callbacksRef.current.onHud(world);
+        onHud(world);
       }
       raf = requestAnimationFrame(frame);
     };
@@ -78,9 +82,17 @@ export function useArena(canvasRef: RefObject<HTMLCanvasElement | null>, callbac
   return { worldRef, inputRef };
 }
 
-/** Lock onto the player; on the title screen drift after the biggest bot instead. */
-function followCamera(cam: Camera, world: World, screen: Screen, dt: number) {
-  const { player } = world;
+/** What the camera shows, in arena units; the host sends the friend only this part. */
+const viewOf = (cam: Camera, screen: Screen): ViewBox => ({
+  x: Math.round(cam.x),
+  y: Math.round(cam.y),
+  w: Math.round(screen.w / 2 / cam.zoom),
+  h: Math.round(screen.h / 2 / cam.zoom),
+});
+
+/** Lock onto this player's snake; on the title screen drift after the biggest bot instead. */
+function followCamera(cam: Camera, world: World, screen: Screen, dt: number, me: number) {
+  const player = world.players[me];
   if (player && !player.alive) return;
   const target = player ?? [...world.snakes].sort((a, b) => b.mass - a.mass)[0];
   if (!target) return;
